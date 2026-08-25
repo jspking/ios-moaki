@@ -92,6 +92,28 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertEqual(analyzer.getDirections(), [], "First direction should require full threshold")
     }
 
+    // MARK: - Deliberate Turn Threshold Tests
+
+    func testDefaultTurnThresholdIgnoresShortRightHookAfterUp() {
+        let analyzer = GestureAnalyzer()
+
+        analyzer.addPoint(CGPoint(x: 100, y: 100))
+        analyzer.addPoint(CGPoint(x: 100, y: 75))  // ↑ 25px
+        analyzer.addPoint(CGPoint(x: 125, y: 75))  // → 25px, below turn threshold
+
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up])
+    }
+
+    func testDefaultTurnThresholdKeepsClearRightTurnAfterUp() {
+        let analyzer = GestureAnalyzer()
+
+        analyzer.addPoint(CGPoint(x: 100, y: 100))
+        analyzer.addPoint(CGPoint(x: 100, y: 75))  // ↑ 25px
+        analyzer.addPoint(CGPoint(x: 131, y: 75))  // → 31px, deliberate turn
+
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up, .right])
+    }
+
     // MARK: - Finalize Gesture Normalization Tests
 
     func testFinalizeKeepsMeaningfulMiddleDiagonalForThreeStrokeTurn() {
