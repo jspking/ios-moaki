@@ -20,8 +20,8 @@ final class KeyboardViewModel: ObservableObject {
     private let backspaceRepeatInitialDelay: TimeInterval
     private let backspaceRepeatInterval: TimeInterval
     private var isBackspacePressing = false
-    private var backspaceInitialDelayTimer: Timer?
-    private var backspaceRepeatTimer: Timer?
+    private var backspaceInitialDelayTask: Task<Void, Never>?
+    private var backspaceRepeatTask: Task<Void, Never>?
     private var didHandleLongPressNumberInCurrentGesture = false
 
     weak var delegate: KeyboardViewModelDelegate?
@@ -35,8 +35,8 @@ final class KeyboardViewModel: ObservableObject {
     }
 
     deinit {
-        backspaceInitialDelayTimer?.invalidate()
-        backspaceRepeatTimer?.invalidate()
+        backspaceInitialDelayTask?.cancel()
+        backspaceRepeatTask?.cancel()
     }
 
     var composingText: String {
@@ -307,39 +307,43 @@ final class KeyboardViewModel: ObservableObject {
     }
 
     private func startBackspaceRepeat() {
-        backspaceInitialDelayTimer?.invalidate()
-        backspaceInitialDelayTimer = makeTimer(
-            interval: backspaceRepeatInitialDelay,
-            repeats: false
-        ) { [weak self] _ in
-            guard let self, self.isBackspacePressing else { return }
-            self.backspaceRepeatTimer?.invalidate()
-            self.backspaceRepeatTimer = self.makeTimer(
-                interval: self.backspaceRepeatInterval,
-                repeats: true
-            ) { [weak self] _ in
-                guard let self, self.isBackspacePressing else { return }
-                self.deleteBackward()
+        backspaceInitialDelayTask?.cancel()
+        backspaceInitialDelayTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+
+            do {
+                try await Task.sleep(
+                    nanoseconds: UInt64(self.backspaceRepeatInitialDelay * 1_000_000_000)
+                )
+            } catch {
+                return
+            }
+
+            guard self.isBackspacePressing else { return }
+            self.backspaceRepeatTask?.cancel()
+            self.backspaceRepeatTask = Task { @MainActor [weak self] in
+                while let self, self.isBackspacePressing {
+                    do {
+                        try await Task.sleep(
+                            nanoseconds: UInt64(self.backspaceRepeatInterval * 1_000_000_000)
+                        )
+                    } catch {
+                        return
+                    }
+
+                    guard self.isBackspacePressing else { return }
+                    self.deleteBackward()
+                }
             }
         }
     }
 
     private func stopBackspaceRepeat() {
         isBackspacePressing = false
-        backspaceInitialDelayTimer?.invalidate()
-        backspaceInitialDelayTimer = nil
-        backspaceRepeatTimer?.invalidate()
-        backspaceRepeatTimer = nil
-    }
-
-    private func makeTimer(
-        interval: TimeInterval,
-        repeats: Bool,
-        handler: @escaping (Timer) -> Void
-    ) -> Timer {
-        let timer = Timer(timeInterval: interval, repeats: repeats, block: handler)
-        RunLoop.main.add(timer, forMode: .common)
-        return timer
+        backspaceInitialDelayTask?.cancel()
+        backspaceInitialDelayTask = nil
+        backspaceRepeatTask?.cancel()
+        backspaceRepeatTask = nil
     }
 }
 
