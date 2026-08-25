@@ -27,7 +27,8 @@ let package = Package(
                 "Models/HangulJamo.swift",
                 "Models/VowelPattern.swift",
                 "Utilities/HangulConstants.swift",
-                "Utilities/KeyboardMetrics.swift"
+                "Utilities/KeyboardMetrics.swift",
+                "ViewModels/KeyboardViewModel.swift"
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v5)
@@ -45,7 +46,11 @@ let package = Package(
             ],
             sources: [
                 "CursorMovementResolverTests.swift",
+                "KeyboardViewModelCursorTests.swift",
                 "SpaceCursorGestureTrackerTests.swift"
+            ],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
         )
     ]
