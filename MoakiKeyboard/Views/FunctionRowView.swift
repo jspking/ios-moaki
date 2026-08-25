@@ -6,7 +6,11 @@ struct FunctionRowView: View {
     let onToggleModePressed: () -> Void
     let onCommaPressed: () -> Void
     let onSpacePressed: () -> Void
+    let onCursorModeBegan: () -> Void
+    let onCursorMove: (CGSize) -> Void
+    let onCursorModeEnded: () -> Void
     let onReturnPressed: () -> Void
+    let interactionResetGeneration: UInt64
 
     private let spacing: CGFloat = KeyboardMetrics.keySpacing
     private let height: CGFloat = KeyboardMetrics.functionRowHeight
@@ -36,15 +40,14 @@ struct FunctionRowView: View {
             )
 
             // Space bar
-            FunctionKeyView(
-                content: AnyView(
-                    Text("space")
-                        .font(.system(size: 16))
-                        .foregroundColor(.secondary)
-                ),
+            SpaceBarView(
                 width: spaceWidth,
                 height: height,
-                action: onSpacePressed
+                interactionResetGeneration: interactionResetGeneration,
+                onTap: onSpacePressed,
+                onCursorModeBegan: onCursorModeBegan,
+                onCursorMove: onCursorMove,
+                onCursorModeEnded: onCursorModeEnded
             )
 
             // Return button
@@ -124,7 +127,11 @@ struct FunctionKeyView: View {
             onToggleModePressed: { print("Toggle") },
             onCommaPressed: { print("Comma") },
             onSpacePressed: { print("Space") },
-            onReturnPressed: { print("Return") }
+            onCursorModeBegan: { print("Cursor began") },
+            onCursorMove: { print("Cursor moved: \($0)") },
+            onCursorModeEnded: { print("Cursor ended") },
+            onReturnPressed: { print("Return") },
+            interactionResetGeneration: 0
         )
 
         Text("Symbol Mode")
@@ -135,7 +142,11 @@ struct FunctionKeyView: View {
             onToggleModePressed: { print("Toggle") },
             onCommaPressed: { print("Comma") },
             onSpacePressed: { print("Space") },
-            onReturnPressed: { print("Return") }
+            onCursorModeBegan: { print("Cursor began") },
+            onCursorMove: { print("Cursor moved: \($0)") },
+            onCursorModeEnded: { print("Cursor ended") },
+            onReturnPressed: { print("Return") },
+            interactionResetGeneration: 0
         )
     }
     .padding()

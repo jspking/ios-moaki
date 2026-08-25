@@ -38,7 +38,11 @@ struct KeyboardView: View {
                         onToggleModePressed: { viewModel.toggleMode() },
                         onCommaPressed: { viewModel.inputSymbol(",") },
                         onSpacePressed: { viewModel.inputSpace() },
-                        onReturnPressed: { viewModel.inputReturn() }
+                        onCursorModeBegan: { viewModel.beginCursorMovement() },
+                        onCursorMove: { viewModel.moveCursor(translation: $0) },
+                        onCursorModeEnded: { viewModel.endCursorMovement() },
+                        onReturnPressed: { viewModel.inputReturn() },
+                        interactionResetGeneration: viewModel.interactionResetGeneration
                     )
                 }
                 .padding(KeyboardMetrics.keySpacing)
