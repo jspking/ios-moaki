@@ -117,6 +117,19 @@ final class VowelResolverTests: XCTestCase {
         XCTAssertEqual(resolver.resolve(directions: [.down, .downLeft, .down]).vowel, .ㅝ)
     }
 
+    func testTerminalVerticalDriftStaysBasicVowel() {
+        // A mostly-upward swipe that drifts right while lifting should remain ㅗ,
+        // rather than being promoted to the ↑→ pattern for ㅘ.
+        XCTAssertEqual(resolver.resolve(directions: [.up, .upRight]).vowel, .ㅗ)
+
+        // Apply the same protection symmetrically to a downward swipe.
+        XCTAssertEqual(resolver.resolve(directions: [.down, .downLeft]).vowel, .ㅜ)
+    }
+
+    func testClearTurnStillProducesWa() {
+        XCTAssertEqual(resolver.resolve(directions: [.up, .right]).vowel, .ㅘ)
+    }
+
     func testDiphthongDriftFallsBackToPrefixMatch() {
         // Additional trailing movement should still keep the best prefix vowel instead of nil.
         XCTAssertEqual(resolver.resolve(directions: [.up, .right]).vowel, .ㅘ)

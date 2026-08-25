@@ -36,6 +36,8 @@ class VowelResolver {
     /// Normalization rules:
     /// 1. First stroke keeps 8-direction intent, except ↖/↙ are canonicalized to ↑/↓.
     /// 2. From the second stroke onward, diagonals are mapped to a single cardinal axis.
+    ///    A final diagonal that continues the previous vertical stroke stays vertical,
+    ///    so natural finger drift does not become an unintended compound vowel.
     /// 3. Consecutive identical directions collapse into one stroke.
     private func normalizeForMatching(_ directions: [GestureDirection]) -> [GestureDirection] {
         guard !directions.isEmpty else { return [] }
@@ -48,7 +50,11 @@ class VowelResolver {
             if index == 0 {
                 next = normalizeFirstStroke(direction)
             } else {
-                next = normalizeTrailingStroke(direction, previous: normalized.last)
+                next = normalizeTrailingStroke(
+                    direction,
+                    previous: normalized.last,
+                    hasFollowingStroke: index < directions.count - 1
+                )
             }
 
             // Treat repeated same-direction segments as one stroke.
@@ -72,7 +78,8 @@ class VowelResolver {
     }
 
     private func normalizeTrailingStroke(_ direction: GestureDirection,
-                                         previous: GestureDirection?) -> GestureDirection {
+                                         previous: GestureDirection?,
+                                         hasFollowingStroke: Bool) -> GestureDirection {
         guard direction.isDiagonal else { return direction }
 
         guard let (vertical, horizontal) = diagonalComponents(of: direction) else {
@@ -88,10 +95,11 @@ class VowelResolver {
             return horizontal
         }
 
-        // For vertical previous strokes, choose horizontal only when the diagonal
-        // shares the same vertical intent (e.g. ↑ then ↗ => →, ↓ then ↘ => →).
+        // A terminal same-axis diagonal is usually natural drift while lifting the
+        // finger. Keep it vertical unless another stroke confirms compound-vowel
+        // intent (e.g. ↑↗← for ㅙ).
         if previous == vertical {
-            return horizontal
+            return hasFollowingStroke ? horizontal : vertical
         }
 
         return vertical
