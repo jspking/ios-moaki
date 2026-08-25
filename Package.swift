@@ -20,6 +20,7 @@ let package = Package(
             sources: [
                 "Engine/GestureAnalyzer.swift",
                 "Engine/HangulComposer.swift",
+                "Engine/CursorMovementResolver.swift",
                 "Engine/SpaceCursorGestureTracker.swift",
                 "Engine/VowelResolver.swift",
                 "Models/GestureDirection.swift",
@@ -43,6 +44,7 @@ let package = Package(
                 "VowelResolverTests.swift"
             ],
             sources: [
+                "CursorMovementResolverTests.swift",
                 "SpaceCursorGestureTrackerTests.swift"
             ]
         )
