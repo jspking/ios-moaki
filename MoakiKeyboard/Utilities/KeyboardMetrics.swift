@@ -35,6 +35,14 @@ enum KeyboardMetrics {
     static let directionChangeThreshold: CGFloat = 30
     static let gestureTimeout: TimeInterval = 0.5    // Max time between direction changes
 
+    // Space cursor gesture tuning values
+    static let spaceDragThreshold: CGFloat = 8
+    static let spaceLongPressDuration: TimeInterval = 0.35
+    static let cursorHorizontalStep: CGFloat = 14
+    static let cursorVerticalStep: CGFloat = 18
+    static let cursorVerticalFallbackStride = 20
+    static let cursorMaximumStepsPerUpdate = 4
+
     // Calculate action key width (backspace/return) based on total width
     static func actionKeyWidth(for totalWidth: CGFloat) -> CGFloat {
         return totalWidth * actionKeyWidthRatio

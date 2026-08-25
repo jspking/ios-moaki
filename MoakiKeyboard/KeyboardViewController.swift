@@ -59,6 +59,11 @@ class KeyboardViewController: UIInputViewController {
         viewModel.resetGestureState()
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewModel.resetGestureState()
+    }
+
     private func setupKeyboardView() {
         let rootView = KeyboardView(viewModel: viewModel).ignoresSafeArea(.all)
         let hostingController = UIHostingController(rootView: rootView)
@@ -92,8 +97,7 @@ class KeyboardViewController: UIInputViewController {
         // Reset composer state when text field is cleared externally
         // (e.g., when user sends a message and the app clears the input field)
         // Only reset if the text field is completely empty
-        if textDocumentProxy.documentContextBeforeInput == nil &&
-           textDocumentProxy.documentContextAfterInput == nil {
+        if !textDocumentProxy.hasText {
             viewModel.resetComposer()
         }
     }
@@ -101,6 +105,14 @@ class KeyboardViewController: UIInputViewController {
 
 // MARK: - KeyboardViewModelDelegate
 extension KeyboardViewController: KeyboardViewModelDelegate {
+    var documentContextBeforeInput: String? {
+        textDocumentProxy.documentContextBeforeInput
+    }
+
+    var documentContextAfterInput: String? {
+        textDocumentProxy.documentContextAfterInput
+    }
+
     func insertText(_ text: String) {
         textDocumentProxy.insertText(text)
     }
@@ -123,6 +135,10 @@ extension KeyboardViewController: KeyboardViewModelDelegate {
         if !current.isEmpty {
             textDocumentProxy.insertText(current)
         }
+    }
+
+    func moveCursor(byCharacterOffset offset: Int) {
+        textDocumentProxy.adjustTextPosition(byCharacterOffset: offset)
     }
 
     func switchToNextKeyboard() {
