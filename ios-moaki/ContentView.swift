@@ -78,11 +78,11 @@ struct ContentView: View {
                 // Buttons
                 VStack(spacing: 12) {
                     NavigationLink {
-                        TutorialContainerView()
+                        KeyboardSettingsView()
                     } label: {
                         HStack {
-                            Image(systemName: "graduationcap")
-                            Text("키보드 튜토리얼 시작")
+                            Image(systemName: "slider.horizontal.3")
+                            Text("키보드 설정")
                         }
                         .font(.headline)
                         .foregroundColor(.white)
@@ -94,10 +94,27 @@ struct ContentView: View {
                         )
                     }
 
+                    NavigationLink {
+                        TutorialContainerView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "graduationcap")
+                            Text("키보드 튜토리얼 시작")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.blue, lineWidth: 1.5)
+                        )
+                    }
+
                     Button(action: openSettings) {
                         HStack {
                             Image(systemName: "gear")
-                            Text("설정 열기")
+                            Text("iOS 키보드 설정 열기")
                         }
                         .font(.headline)
                         .foregroundColor(.blue)
