@@ -46,6 +46,7 @@ let package = Package(
             ],
             sources: [
                 "CursorMovementResolverTests.swift",
+                "GestureDirectionToleranceTests.swift",
                 "KeyboardViewModelCursorTests.swift",
                 "SpaceCursorGestureTrackerTests.swift"
             ],
