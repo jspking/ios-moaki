@@ -43,13 +43,13 @@ let package = Package(
             path: "MoakiKeyboardTests",
             exclude: [
                 "GestureAnalyzerTests.swift",
-                "HangulComposerTests.swift",
                 "VowelResolverTests.swift"
             ],
             sources: [
                 "CursorMovementResolverTests.swift",
                 "GestureDirectionToleranceTests.swift",
                 "HangulComposerDeletionTests.swift",
+                "HangulComposerTests.swift",
                 "KeyboardMetricsLayoutTests.swift",
                 "KeyboardViewModelCursorTests.swift",
                 "KeyboardViewModelDeletionTests.swift",

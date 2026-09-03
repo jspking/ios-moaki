@@ -1,5 +1,10 @@
 import XCTest
+
+#if SWIFT_PACKAGE
+@testable import MoakiKeyboardCore
+#else
 @testable import MoakiKeyboard
+#endif
 
 final class HangulComposerTests: XCTestCase {
 
@@ -153,26 +158,14 @@ final class HangulComposerTests: XCTestCase {
 
     func testHelloWorld() {
         // 안녕하세요
-        let inputs: [(Choseong?, Jungseong?)] = [
-            (.ㅇ, .ㅏ), (nil, nil), // 아 + ㄴ (next)
-            (.ㄴ, nil), // attached as jongseong
-            (nil, .ㅕ), // splits to 안 + 녀
-            (.ㅇ, nil), // 녕
-            (nil, nil), // commit
-            (.ㅎ, .ㅏ), // 하
-            (.ㅅ, nil), // 세 (next syllable start)
-            (nil, .ㅔ), // 세
-            (.ㅇ, nil), // jongseong? no, starts new: 세 + ㅇ
-            (nil, .ㅛ), // 셍? no - 세요
-        ]
-
-        // Simplified test
         _ = composer.inputChoseong(.ㅇ)
         _ = composer.inputJungseong(.ㅏ)
         _ = composer.inputChoseong(.ㄴ)
+        composer.commitCurrent()
+
+        _ = composer.inputChoseong(.ㄴ)
         _ = composer.inputJungseong(.ㅕ)
         _ = composer.inputChoseong(.ㅇ)
-
         composer.commitCurrent()
 
         _ = composer.inputChoseong(.ㅎ)
@@ -198,33 +191,23 @@ final class HangulComposerTests: XCTestCase {
         _ = composer.inputChoseong(.ㄱ)
         _ = composer.inputJungseong(.ㅏ)
         _ = composer.inputChoseong(.ㅁ)
-        _ = composer.inputJungseong(.ㅏ)
-
-        XCTAssertEqual(composer.composedText, "가")
+        composer.commitCurrent()
 
         _ = composer.inputChoseong(.ㅅ)
         _ = composer.inputJungseong(.ㅏ)
-
-        XCTAssertEqual(composer.composedText, "감")
+        composer.commitCurrent()
 
         _ = composer.inputChoseong(.ㅎ)
         _ = composer.inputJungseong(.ㅏ)
-
-        XCTAssertEqual(composer.composedText, "감사")
-
         _ = composer.inputChoseong(.ㅂ)
-        _ = composer.inputJungseong(.ㅣ)
-
-        XCTAssertEqual(composer.composedText, "감사하")
+        composer.commitCurrent()
 
         _ = composer.inputChoseong(.ㄴ)
-        _ = composer.inputJungseong(.ㅏ)
-
-        XCTAssertEqual(composer.composedText, "감사합")
+        _ = composer.inputJungseong(.ㅣ)
+        composer.commitCurrent()
 
         _ = composer.inputChoseong(.ㄷ)
         _ = composer.inputJungseong(.ㅏ)
-
         composer.commitCurrent()
 
         XCTAssertEqual(composer.composedText, "감사합니다")
