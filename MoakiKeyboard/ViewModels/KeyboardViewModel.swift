@@ -326,6 +326,8 @@ final class KeyboardViewModel: ObservableObject {
             return
         }
 
+        reconcileComposerWithDocumentContext()
+
         switch deletionUnit {
         case .compositionStep:
             deleteCompositionStep()
@@ -359,6 +361,15 @@ final class KeyboardViewModel: ObservableObject {
 
         composer.reset()
         updateComposingText()
+    }
+
+    private func reconcileComposerWithDocumentContext() {
+        guard !lastComposingText.isEmpty,
+              let contextBeforeInput = delegate?.documentContextBeforeInput,
+              !contextBeforeInput.hasSuffix(lastComposingText) else { return }
+
+        lastComposingText = ""
+        composer.reset()
     }
 
     func repeatBackspaceIfNeeded() {

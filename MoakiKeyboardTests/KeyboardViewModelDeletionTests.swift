@@ -120,6 +120,30 @@ final class KeyboardViewModelDeletionTests: XCTestCase {
         XCTAssertEqual(delegate.systemDeleteCount, 1)
     }
 
+    func testMissingDocumentContextStillUsesTrackedComposition() {
+        let (viewModel, delegate) = makeSystem()
+        viewModel.inputConsonant(.ㄱ)
+        viewModel.inputVowel(.ㅏ)
+        viewModel.inputConsonant(.ㅂ)
+        viewModel.inputConsonant(.ㅅ)
+        delegate.providesDocumentContext = false
+
+        viewModel.deleteBackward()
+
+        XCTAssertEqual(delegate.text, "갑")
+    }
+
+    func testChangedDocumentContextDropsStaleCompositionBeforeDeletion() {
+        let (viewModel, delegate) = makeSystem()
+        viewModel.inputConsonant(.ㄱ)
+        viewModel.inputVowel(.ㅏ)
+        delegate.text = "나"
+
+        viewModel.deleteBackward()
+
+        XCTAssertEqual(delegate.text, "ㄴ")
+    }
+
     func testLongPressUsesSnapshotAndModeChangeStopsFurtherTicks() {
         let (viewModel, delegate) = makeSystem(text: "값")
 

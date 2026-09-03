@@ -43,4 +43,12 @@ final class HangulComposerDeletionTests: XCTestCase {
         XCTAssertFalse(composer.resumeComposing("👨‍👩‍👧‍👦"))
         XCTAssertEqual(composer.state, .empty)
     }
+
+    func testResumeRejectsHangulWithCombiningMark() throws {
+        let composer = HangulComposer()
+        let decoratedHangul = try XCTUnwrap("가\u{301}".first)
+
+        XCTAssertFalse(composer.resumeComposing(decoratedHangul))
+        XCTAssertEqual(composer.state, .empty)
+    }
 }
