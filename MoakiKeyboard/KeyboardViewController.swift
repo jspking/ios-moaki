@@ -65,7 +65,15 @@ class KeyboardViewController: UIInputViewController {
     }
 
     private func setupKeyboardView() {
-        let rootView = KeyboardView(viewModel: viewModel).ignoresSafeArea(.all)
+        let rootView = KeyboardView(
+            viewModel: viewModel,
+            onInputModeList: { [weak self] sourceView, event in
+                guard let self else { return }
+                self.viewModel.prepareForKeyboardSwitch()
+                self.handleInputModeList(from: sourceView, with: event)
+            }
+        )
+        .ignoresSafeArea(.all)
         let hostingController = UIHostingController(rootView: rootView)
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false

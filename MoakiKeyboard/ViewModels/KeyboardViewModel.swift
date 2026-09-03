@@ -104,9 +104,13 @@ final class KeyboardViewModel: ObservableObject {
     }
 
     func switchKeyboard() {
+        prepareForKeyboardSwitch()
+        delegate?.switchToNextKeyboard()
+    }
+
+    func prepareForKeyboardSwitch() {
         stopBackspaceRepeat()
         commitCurrent()
-        delegate?.switchToNextKeyboard()
     }
 
     func beginBackspacePress() {

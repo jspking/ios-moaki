@@ -21,13 +21,15 @@ enum GestureDirection: String, CaseIterable {
         // Normalize to 0-360
         let normalizedDegrees = degrees < 0 ? degrees + 360 : degrees
 
-        // 8 directions with adjusted sectors (wider right-diagonals for ㅣ, ㅡ)
+        // Keep a wider tolerance for vertical vowels on the screen-right side.
+        // A vertical stroke may drift up to 20 degrees to the right and still
+        // resolve as ㅗ/ㅜ, while deliberate 45-degree strokes remain ㅣ/ㅡ.
         switch normalizedDegrees {
         case 330...360, 0..<30:
             return .right
-        case 30..<80:
+        case 30..<70:
             return .upRight
-        case 80..<120:
+        case 70..<120:
             return .up
         case 120..<150:
             return .upLeft
@@ -35,9 +37,9 @@ enum GestureDirection: String, CaseIterable {
             return .left
         case 210..<240:
             return .downLeft
-        case 240..<280:
+        case 240..<290:
             return .down
-        case 280..<330:
+        case 290..<330:
             return .downRight
         default:
             return .right

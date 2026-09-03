@@ -17,14 +17,17 @@ enum KeyboardMetrics {
     static let keySpacing: CGFloat = 4
     static let keyCornerRadius: CGFloat = 8
 
-    // Width ratio for side symbol keys (relative to center keys)
-    static let symbolWidthRatio: CGFloat = 0.35
+    // Keep the less frequently used left symbols compact, while giving the
+    // screen-edge punctuation keys a full-size touch target.
+    static let leftSymbolWidthRatio: CGFloat = 0.35
+    static let rightSymbolKeyWidth: CGFloat = 44
 
     // Width ratio for action keys (backspace/return) relative to total width
     static let actionKeyWidthRatio: CGFloat = 0.20
 
     // Function row
     static let functionRowHeight: CGFloat = 44
+    static let functionKeyMinimumWidth: CGFloat = 44
 
     // Gesture thresholds
     static let gestureThreshold: CGFloat = 20        // Minimum distance to register direction
@@ -49,11 +52,11 @@ enum KeyboardMetrics {
     }
 
     // Calculate center key width based on available space
-    // Row 0-2: side*2 + center*5 = 0.35*2 + 5 = 5.7 units
+    // Row 0-2: left symbol + center*5 + fixed-width right symbol.
     static func centerKeyWidth(for totalWidth: CGFloat) -> CGFloat {
         let spacing = keySpacing * 8  // 8 gaps for 7 columns + edges
-        let availableWidth = totalWidth - spacing
-        return availableWidth / (symbolWidthRatio * 2 + 5)
+        let availableWidth = totalWidth - spacing - rightSymbolKeyWidth
+        return availableWidth / (leftSymbolWidthRatio + 5)
     }
 
     // Calculate key height based on available space
@@ -64,19 +67,22 @@ enum KeyboardMetrics {
 
     // Get key width for specific column and row
     static func keyWidth(for column: Int, row: Int, centerKeyWidth: CGFloat) -> CGFloat {
-        let sideWidth = centerKeyWidth * symbolWidthRatio
+        let leftSymbolWidth = centerKeyWidth * leftSymbolWidthRatio
 
         // Row 3: backspace (col 5) fills remaining space to match row 0-2 width
-        // Row 0-2 width: 2*sideWidth + 5*centerKeyWidth + 6*spacing
-        // Row 3 without backspace: sideWidth + 4*centerKeyWidth + 5*spacing
-        // backspaceWidth = sideWidth + centerKeyWidth + spacing
+        // Row 0-2 width: leftSymbol + 5*center + rightSymbol + 6*spacing
+        // Row 3 without backspace: leftSymbol + 4*center + 5*spacing
+        // backspaceWidth = rightSymbol + center + spacing
         if row == 3 && column == 5 {
-            return sideWidth + centerKeyWidth + keySpacing
+            return rightSymbolKeyWidth + centerKeyWidth + keySpacing
         }
 
-        // Side columns (col 0 and col 6) are narrow
-        if column == 0 || column == 6 {
-            return sideWidth
+        if column == 0 {
+            return leftSymbolWidth
+        }
+
+        if column == 6 {
+            return rightSymbolKeyWidth
         }
 
         return centerKeyWidth

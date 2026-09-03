@@ -1,9 +1,11 @@
 import SwiftUI
+import UIKit
 
 struct FunctionRowView: View {
     let totalWidth: CGFloat
     let isSymbolMode: Bool
     let onToggleModePressed: () -> Void
+    let onInputModeList: (UIView, UIEvent) -> Void
     let onCommaPressed: () -> Void
     let onSpacePressed: () -> Void
     let onCursorModeBegan: () -> Void
@@ -17,7 +19,7 @@ struct FunctionRowView: View {
 
     var body: some View {
         HStack(spacing: spacing) {
-            // 123/한글 toggle button (replaces globe)
+            // 123/한글 toggle button
             FunctionKeyView(
                 content: AnyView(
                     Text(isSymbolMode ? "한글" : "123")
@@ -26,6 +28,13 @@ struct FunctionRowView: View {
                 width: toggleWidth,
                 height: height,
                 action: onToggleModePressed
+            )
+
+            // System input-mode switcher: tap advances, long press shows the list.
+            InputModeSwitchKeyView(
+                width: inputModeSwitchWidth,
+                height: height,
+                onInputModeList: onInputModeList
             )
 
             // Comma key (left of space)
@@ -64,14 +73,18 @@ struct FunctionRowView: View {
     }
 
     private var returnWidth: CGFloat {
-        // Match backspace width: sideWidth + centerKeyWidth + spacing
+        // Match backspace width: right symbol + center key + spacing.
         let centerKeyWidth = KeyboardMetrics.centerKeyWidth(for: totalWidth)
-        let sideWidth = centerKeyWidth * KeyboardMetrics.symbolWidthRatio
-        return sideWidth + centerKeyWidth + KeyboardMetrics.keySpacing
+        return KeyboardMetrics.rightSymbolKeyWidth + centerKeyWidth + KeyboardMetrics.keySpacing
     }
 
     private var availableWidthWithoutReturn: CGFloat {
-        totalWidth - returnWidth - spacing * 5  // 5 gaps for 4 buttons + edges
+        // Four gaps between five buttons plus the two outer padding gaps.
+        totalWidth - returnWidth - inputModeSwitchWidth - spacing * 6
+    }
+
+    private var inputModeSwitchWidth: CGFloat {
+        KeyboardMetrics.functionKeyMinimumWidth
     }
 
     private var toggleWidth: CGFloat {
@@ -84,6 +97,57 @@ struct FunctionRowView: View {
 
     private var spaceWidth: CGFloat {
         availableWidthWithoutReturn * 0.56
+    }
+}
+
+private struct InputModeSwitchKeyView: UIViewRepresentable {
+    let width: CGFloat
+    let height: CGFloat
+    let onInputModeList: (UIView, UIEvent) -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onInputModeList: onInputModeList)
+    }
+
+    func makeUIView(context: Context) -> UIButton {
+        let button = UIButton(type: .system)
+        button.accessibilityLabel = "키보드 전환"
+        button.tintColor = .label
+        button.setImage(
+            UIImage(systemName: "globe", withConfiguration: UIImage.SymbolConfiguration(pointSize: 20)),
+            for: .normal
+        )
+        button.layer.cornerRadius = KeyboardMetrics.keyCornerRadius
+        button.clipsToBounds = true
+        button.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.handleInputModeList(_:with:)),
+            for: .allTouchEvents
+        )
+        updateAppearance(of: button)
+        return button
+    }
+
+    func updateUIView(_ button: UIButton, context: Context) {
+        context.coordinator.onInputModeList = onInputModeList
+        updateAppearance(of: button)
+    }
+
+    private func updateAppearance(of button: UIButton) {
+        button.backgroundColor = button.isHighlighted ? .systemGray4 : .systemGray5
+    }
+
+    final class Coordinator: NSObject {
+        var onInputModeList: (UIView, UIEvent) -> Void
+
+        init(onInputModeList: @escaping (UIView, UIEvent) -> Void) {
+            self.onInputModeList = onInputModeList
+        }
+
+        @objc func handleInputModeList(_ sender: UIButton, with event: UIEvent) {
+            sender.backgroundColor = sender.isHighlighted ? .systemGray4 : .systemGray5
+            onInputModeList(sender, event)
+        }
     }
 }
 
@@ -125,6 +189,7 @@ struct FunctionKeyView: View {
             totalWidth: 350,
             isSymbolMode: false,
             onToggleModePressed: { print("Toggle") },
+            onInputModeList: { _, _ in print("Input mode list") },
             onCommaPressed: { print("Comma") },
             onSpacePressed: { print("Space") },
             onCursorModeBegan: { print("Cursor began") },
@@ -140,6 +205,7 @@ struct FunctionKeyView: View {
             totalWidth: 350,
             isSymbolMode: true,
             onToggleModePressed: { print("Toggle") },
+            onInputModeList: { _, _ in print("Input mode list") },
             onCommaPressed: { print("Comma") },
             onSpacePressed: { print("Space") },
             onCursorModeBegan: { print("Cursor began") },
