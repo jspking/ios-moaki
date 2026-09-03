@@ -14,6 +14,7 @@ let package = Package(
             exclude: [
                 "Info.plist",
                 "KeyboardViewController.swift",
+                "MoakiKeyboard.entitlements",
                 "Utilities/KeyboardSettings.swift",
                 "Views"
             ],
@@ -29,6 +30,7 @@ let package = Package(
                 "Models/DeletionUnit.swift",
                 "Utilities/HangulConstants.swift",
                 "Utilities/KeyboardMetrics.swift",
+                "Utilities/SharedKeyboardPreferences.swift",
                 "ViewModels/KeyboardViewModel.swift"
             ],
             swiftSettings: [
@@ -52,6 +54,7 @@ let package = Package(
                 "KeyboardViewModelCursorTests.swift",
                 "KeyboardViewModelDeletionTests.swift",
                 "KeyboardViewModelLongPressTests.swift",
+                "SharedKeyboardPreferencesTests.swift",
                 "SpaceCursorGestureTrackerTests.swift"
             ],
             swiftSettings: [
