@@ -7,6 +7,31 @@ import XCTest
 #endif
 
 final class HangulComposerDeletionTests: XCTestCase {
+    func testEveryCompoundVowelReturnsToItsPreviousCompositionStep() {
+        let cases: [(input: Character, expected: Character)] = [
+            ("과", "고"),
+            ("괘", "과"),
+            ("괴", "고"),
+            ("궈", "구"),
+            ("궤", "궈"),
+            ("귀", "구"),
+            ("긔", "그")
+        ]
+
+        for testCase in cases {
+            let composer = HangulComposer()
+
+            XCTAssertTrue(composer.resumeComposing(testCase.input))
+            _ = composer.deleteBackward()
+
+            XCTAssertEqual(
+                composer.currentComposingCharacter,
+                testCase.expected,
+                "Expected \(testCase.input) to return to \(testCase.expected)"
+            )
+        }
+    }
+
     func testResumedDoubleFinalDeletesByCompositionStep() {
         let composer = HangulComposer()
 

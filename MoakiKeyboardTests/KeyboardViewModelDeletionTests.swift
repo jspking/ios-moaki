@@ -110,6 +110,30 @@ final class KeyboardViewModelDeletionTests: XCTestCase {
         XCTAssertEqual(delegate.systemDeleteCount, 1)
     }
 
+    func testSelectionTakesPriorityOverTrackedComposition() {
+        let (viewModel, delegate) = makeSystem()
+        viewModel.inputConsonant(.ㄱ)
+        viewModel.inputVowel(.ㅏ)
+        delegate.text.append("abc")
+        delegate.selectedText = "abc"
+        let deleteCountBeforeBackspace = delegate.systemDeleteCount
+
+        viewModel.deleteBackward()
+
+        XCTAssertEqual(delegate.text, "가")
+        XCTAssertEqual(delegate.systemDeleteCount, deleteCountBeforeBackspace + 1)
+        XCTAssertEqual(viewModel.composingText, "")
+    }
+
+    func testCompositionStepFallsBackToSystemDeletionForNonHangulGrapheme() {
+        let (viewModel, delegate) = makeSystem(text: "가👨‍👩‍👧‍👦")
+
+        viewModel.deleteBackward()
+
+        XCTAssertEqual(delegate.text, "가")
+        XCTAssertEqual(delegate.systemDeleteCount, 1)
+    }
+
     func testMissingDocumentContextFallsBackToOneSystemDeletion() {
         let (viewModel, delegate) = makeSystem(text: "값")
         delegate.providesDocumentContext = false
@@ -158,6 +182,22 @@ final class KeyboardViewModelDeletionTests: XCTestCase {
 
         XCTAssertEqual(delegate.text, "가")
         XCTAssertEqual(viewModel.deletionUnit, .character)
+    }
+
+    func testLongPressCharacterModeDeletesOneGraphemePerTick() {
+        let (viewModel, delegate) = makeSystem(
+            text: "가👨‍👩‍👧‍👦",
+            deletionUnit: .character
+        )
+
+        viewModel.beginBackspacePress()
+        XCTAssertEqual(delegate.text, "가")
+
+        viewModel.repeatBackspaceIfNeeded()
+        XCTAssertEqual(delegate.text, "")
+        XCTAssertEqual(delegate.systemDeleteCount, 2)
+
+        viewModel.endBackspacePress()
     }
 
     private func makeSystem(
