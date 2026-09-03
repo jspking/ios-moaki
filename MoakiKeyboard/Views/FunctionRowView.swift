@@ -64,10 +64,9 @@ struct FunctionRowView: View {
     }
 
     private var returnWidth: CGFloat {
-        // Match backspace width: sideWidth + centerKeyWidth + spacing
+        // Match backspace width: right symbol + center key + spacing.
         let centerKeyWidth = KeyboardMetrics.centerKeyWidth(for: totalWidth)
-        let sideWidth = centerKeyWidth * KeyboardMetrics.symbolWidthRatio
-        return sideWidth + centerKeyWidth + KeyboardMetrics.keySpacing
+        return KeyboardMetrics.rightSymbolKeyWidth + centerKeyWidth + KeyboardMetrics.keySpacing
     }
 
     private var availableWidthWithoutReturn: CGFloat {
