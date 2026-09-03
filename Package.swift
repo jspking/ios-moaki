@@ -26,6 +26,7 @@ let package = Package(
                 "Models/GestureDirection.swift",
                 "Models/HangulJamo.swift",
                 "Models/VowelPattern.swift",
+                "Models/DeletionUnit.swift",
                 "Utilities/HangulConstants.swift",
                 "Utilities/KeyboardMetrics.swift",
                 "ViewModels/KeyboardViewModel.swift"
@@ -41,14 +42,16 @@ let package = Package(
             exclude: [
                 "GestureAnalyzerTests.swift",
                 "HangulComposerTests.swift",
-                "KeyboardViewModelLongPressTests.swift",
                 "VowelResolverTests.swift"
             ],
             sources: [
                 "CursorMovementResolverTests.swift",
                 "GestureDirectionToleranceTests.swift",
+                "HangulComposerDeletionTests.swift",
                 "KeyboardMetricsLayoutTests.swift",
                 "KeyboardViewModelCursorTests.swift",
+                "KeyboardViewModelDeletionTests.swift",
+                "KeyboardViewModelLongPressTests.swift",
                 "SpaceCursorGestureTrackerTests.swift"
             ],
             swiftSettings: [

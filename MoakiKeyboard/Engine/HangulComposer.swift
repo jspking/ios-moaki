@@ -36,6 +36,21 @@ class HangulComposer {
         composedText = ""
     }
 
+    @discardableResult
+    func resumeComposing(_ character: Character) -> Bool {
+        guard let (choseong, jungseong, jongseong) = HangulConstants.decomposeSyllable(character) else {
+            return false
+        }
+
+        composedText = ""
+        if jongseong == .none {
+            state = .choseongJungseong(choseong, jungseong)
+        } else {
+            state = .complete(choseong, jungseong, jongseong)
+        }
+        return true
+    }
+
     /// Retrieves and clears any committed text waiting to be inserted
     func flushCommittedText() -> String {
         let text = composedText
@@ -161,8 +176,12 @@ class HangulComposer {
             state = .empty
             return .update
 
-        case .choseongJungseong(let cho, _):
-            state = .choseong(cho)
+        case .choseongJungseong(let cho, let jung):
+            if let previousVowel = jung.previousDeletionStep {
+                state = .choseongJungseong(cho, previousVowel)
+            } else {
+                state = .choseong(cho)
+            }
             return .update
 
         case .complete(let cho, let jung, let jong):

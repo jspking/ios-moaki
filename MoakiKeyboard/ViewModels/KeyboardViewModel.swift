@@ -17,6 +17,9 @@ final class KeyboardViewModel: ObservableObject {
     private var cursorMovementResolver = CursorMovementResolver()
     private var lastComposingText = ""
 
+    private(set) var deletionUnit: DeletionUnit
+    private var activeBackspaceDeletionUnit: DeletionUnit?
+
     private let backspaceRepeatInitialDelay: TimeInterval
     private let backspaceRepeatInterval: TimeInterval
     private var isBackspacePressing = false
@@ -27,9 +30,11 @@ final class KeyboardViewModel: ObservableObject {
     weak var delegate: KeyboardViewModelDelegate?
 
     init(
+        deletionUnit: DeletionUnit = .compositionStep,
         backspaceRepeatInitialDelay: TimeInterval = 0.4,
         backspaceRepeatInterval: TimeInterval = 0.08
     ) {
+        self.deletionUnit = deletionUnit
         self.backspaceRepeatInitialDelay = backspaceRepeatInitialDelay
         self.backspaceRepeatInterval = backspaceRepeatInterval
     }
@@ -84,13 +89,15 @@ final class KeyboardViewModel: ObservableObject {
     }
 
     func deleteBackward() {
-        let action = composer.deleteBackward()
-        if action == .none {
-            delegate?.deleteBackward()
-        } else {
-            handleComposerAction(action)
-        }
+        deleteBackward(using: deletionUnit)
         triggerHapticFeedback()
+    }
+
+    func applyDeletionUnit(_ deletionUnit: DeletionUnit) {
+        guard self.deletionUnit != deletionUnit else { return }
+        stopBackspaceRepeat()
+        commitCurrent()
+        self.deletionUnit = deletionUnit
     }
 
     func inputSpace() {
@@ -116,7 +123,9 @@ final class KeyboardViewModel: ObservableObject {
     func beginBackspacePress() {
         guard !isBackspacePressing else { return }
         isBackspacePressing = true
-        deleteBackward()
+        activeBackspaceDeletionUnit = deletionUnit
+        deleteBackward(using: deletionUnit)
+        triggerHapticFeedback()
         startBackspaceRepeat()
     }
 
@@ -310,6 +319,55 @@ final class KeyboardViewModel: ObservableObject {
         delegate?.triggerHapticFeedback()
     }
 
+    private func deleteBackward(using deletionUnit: DeletionUnit) {
+        guard delegate?.selectedText?.isEmpty != false else {
+            commitCurrent()
+            delegate?.deleteBackward()
+            return
+        }
+
+        switch deletionUnit {
+        case .compositionStep:
+            deleteCompositionStep()
+        case .character:
+            deleteCharacter()
+        }
+    }
+
+    private func deleteCompositionStep() {
+        let action = composer.deleteBackward()
+        if action != .none {
+            handleComposerAction(action)
+            return
+        }
+
+        guard let lastCharacter = delegate?.documentContextBeforeInput?.last,
+              composer.resumeComposing(lastCharacter) else {
+            delegate?.deleteBackward()
+            return
+        }
+
+        delegate?.deleteBackward()
+        handleComposerAction(composer.deleteBackward())
+    }
+
+    private func deleteCharacter() {
+        guard composer.currentComposingCharacter != nil || !lastComposingText.isEmpty else {
+            delegate?.deleteBackward()
+            return
+        }
+
+        composer.reset()
+        updateComposingText()
+    }
+
+    func repeatBackspaceIfNeeded() {
+        guard isBackspacePressing,
+              let activeBackspaceDeletionUnit else { return }
+        deleteBackward(using: activeBackspaceDeletionUnit)
+        triggerHapticFeedback()
+    }
+
     private func startBackspaceRepeat() {
         backspaceInitialDelayTask?.cancel()
         backspaceInitialDelayTask = Task { @MainActor [weak self] in
@@ -336,7 +394,7 @@ final class KeyboardViewModel: ObservableObject {
                     }
 
                     guard self.isBackspacePressing else { return }
-                    self.deleteBackward()
+                    self.repeatBackspaceIfNeeded()
                 }
             }
         }
@@ -348,6 +406,7 @@ final class KeyboardViewModel: ObservableObject {
         backspaceInitialDelayTask = nil
         backspaceRepeatTask?.cancel()
         backspaceRepeatTask = nil
+        activeBackspaceDeletionUnit = nil
     }
 }
 
@@ -355,6 +414,7 @@ final class KeyboardViewModel: ObservableObject {
 protocol KeyboardViewModelDelegate: AnyObject {
     var documentContextBeforeInput: String? { get }
     var documentContextAfterInput: String? { get }
+    var selectedText: String? { get }
 
     func insertText(_ text: String)
     func deleteBackward()
@@ -367,5 +427,6 @@ protocol KeyboardViewModelDelegate: AnyObject {
 extension KeyboardViewModelDelegate {
     var documentContextBeforeInput: String? { nil }
     var documentContextAfterInput: String? { nil }
+    var selectedText: String? { nil }
     func moveCursor(byCharacterOffset offset: Int) {}
 }
