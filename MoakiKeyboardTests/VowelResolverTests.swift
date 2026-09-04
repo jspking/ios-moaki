@@ -163,11 +163,15 @@ final class VowelResolverTests: XCTestCase {
     // MARK: - Special Vowels
 
     func testSpecialVowels() {
-        // ㅢ = ↘↖ (오른쪽아래-왼쪽위)
-        XCTAssertEqual(resolver.resolve(directions: [.downRight, .upLeft]).vowel, .ㅢ)
-
         // ㅢ = ↘↑ (오른쪽아래-위)
         XCTAssertEqual(resolver.resolve(directions: [.downRight, .up]).vowel, .ㅢ)
+    }
+
+    /// ↘↖ reaches ㅢ through normalization rather than through a pattern of its
+    /// own: a trailing ↖ after ↘ is rewritten to ↑ before matching. Keeping a
+    /// second ㅢ entry for ↘↖ only looked like it was doing something.
+    func testTrailingUpLeftAfterDownRightNormalizesIntoEui() {
+        XCTAssertEqual(resolver.resolve(directions: [.downRight, .upLeft]).vowel, .ㅢ)
     }
 
     // MARK: - Edge Cases
