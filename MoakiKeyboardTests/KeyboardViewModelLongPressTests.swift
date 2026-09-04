@@ -64,7 +64,6 @@ private final class SpyKeyboardDelegate: KeyboardViewModelDelegate {
     var insertedTexts: [String] = []
     var deleteCount = 0
     var composingUpdates: [ComposingUpdate] = []
-    var switchKeyboardCount = 0
     var hapticCount = 0
 
     func insertText(_ text: String) {
@@ -77,10 +76,6 @@ private final class SpyKeyboardDelegate: KeyboardViewModelDelegate {
 
     func updateComposingText(from previous: String, to current: String) {
         composingUpdates.append(.init(previous: previous, current: current))
-    }
-
-    func switchToNextKeyboard() {
-        switchKeyboardCount += 1
     }
 
     func triggerHapticFeedback() {
