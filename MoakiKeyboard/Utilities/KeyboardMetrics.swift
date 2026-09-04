@@ -31,6 +31,12 @@ enum KeyboardMetrics {
 
     // Gesture thresholds
     static let gestureThreshold: CGFloat = 20        // Minimum distance to register direction
+    // Every basic vowel owns the same angular window around its own axis, so
+    // ㅗ and ㅜ drift the same amount to either side as ㅏ and ㅓ already do.
+    static let cardinalHalfAngle: CGFloat = 30
+    // ㅣ(↗) and ㅡ(↘) share their angles with the basic vowels and are told
+    // apart by a deliberately longer drag. Roughly 1.3 key heights.
+    static let diagonalThreshold: CGFloat = 55
     static let reversalThreshold: CGFloat = 10       // Lower threshold for opposite direction reversals
     // Require a more deliberate orthogonal turn than the initial stroke.
     // This prevents the natural hook at the end of an upward swipe from

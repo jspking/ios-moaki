@@ -47,6 +47,7 @@ let package = Package(
                 "KeyboardViewModelCursorTests.swift",
                 "KeyboardViewModelLongPressTests.swift",
                 "SpaceCursorGestureTrackerTests.swift",
+                "VowelGesturePathTests.swift",
                 "VowelResolverTests.swift"
             ],
             swiftSettings: [

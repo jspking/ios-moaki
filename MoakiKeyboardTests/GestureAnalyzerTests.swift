@@ -118,6 +118,56 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertEqual(analyzer.finalizeGesture(), [.up, .right])
     }
 
+    // MARK: - Opening Stroke Length Tests
+
+    /// The complaint behind this rule: a vertical drag that leans to the right
+    /// used to tip over into ㅣ. It now stays ㅗ however far the finger travels.
+    func testVerticalStrokeLeaningRightStaysUpAtAnyLength() {
+        for length in [CGFloat(30), 60, 90, 140] {
+            let analyzer = GestureAnalyzer()
+            feed(analyzer, degrees: 65, length: length)
+            XCTAssertEqual(analyzer.finalizeGesture(), [.up], "\(length)pt")
+        }
+    }
+
+    func testLongVerticalStrokeIsNeverPromotedToADiagonal() {
+        let analyzer = GestureAnalyzer()
+        feed(analyzer, degrees: 90, length: 140)
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up])
+    }
+
+    func testOpeningDiagonalStaysBasicUntilItPassesTheDiagonalThreshold() {
+        let analyzer = GestureAnalyzer()
+        feed(analyzer, degrees: 45, length: KeyboardMetrics.diagonalThreshold - 5)
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up])
+    }
+
+    func testOpeningDiagonalIsRejudgedAsTheFingerKeepsTravelling() {
+        let analyzer = GestureAnalyzer()
+        feed(analyzer, degrees: 45, length: 30)
+        XCTAssertEqual(analyzer.getDirections(), [.up], "short diagonal starts out as ㅗ")
+
+        feed(analyzer, degrees: 45, length: 60, from: 30)
+        XCTAssertEqual(analyzer.finalizeGesture(), [.upRight], "and is revised once it is long enough")
+    }
+
+    func testLongDownRightStrokeBecomesTheDiagonalForEu() {
+        let analyzer = GestureAnalyzer()
+        feed(analyzer, degrees: 315, length: 90)
+        XCTAssertEqual(analyzer.finalizeGesture(), [.downRight])
+    }
+
+    /// Revising the opening stroke must not eat a genuine turn, or ㅘ would
+    /// collapse into a single stroke.
+    func testTurnAfterTheOpeningStrokeSurvivesTheRevision() {
+        let analyzer = GestureAnalyzer()
+        analyzer.addPoint(CGPoint(x: 100, y: 200))
+        analyzer.addPoint(CGPoint(x: 100, y: 140))   // ↑ 60px, past the diagonal threshold
+        analyzer.addPoint(CGPoint(x: 145, y: 140))   // → 45px, deliberate turn
+
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up, .right])
+    }
+
     // MARK: - Finalize Gesture Normalization Tests
 
     func testFinalizeKeepsMeaningfulMiddleDiagonalForThreeStrokeTurn() {
@@ -173,5 +223,28 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertFalse(GestureDirection.up.isOpposite(to: .upRight))
         XCTAssertFalse(GestureDirection.downRight.isOpposite(to: .upRight))
         XCTAssertFalse(GestureDirection.left.isOpposite(to: .downLeft))
+    }
+
+    // MARK: - Helpers
+
+    /// Feed a straight drag sampled every few points, the way a finger reports.
+    private func feed(_ analyzer: GestureAnalyzer,
+                      degrees: CGFloat,
+                      length: CGFloat,
+                      from startLength: CGFloat = 0,
+                      origin: CGPoint = CGPoint(x: 150, y: 250),
+                      step: CGFloat = 4) {
+        let radians = degrees * .pi / 180
+        if startLength == 0 {
+            analyzer.addPoint(origin)
+        }
+        var travelled = startLength
+        while travelled < length {
+            travelled = min(travelled + step, length)
+            analyzer.addPoint(CGPoint(
+                x: origin.x + cos(radians) * travelled,
+                y: origin.y - sin(radians) * travelled
+            ))
+        }
     }
 }
