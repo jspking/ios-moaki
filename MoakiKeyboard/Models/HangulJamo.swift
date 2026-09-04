@@ -34,6 +34,24 @@ enum Jungseong: Int, CaseIterable {
                                    "ㅣ"]
         return chars[rawValue]
     }
+
+    /// Returns the vowel produced by removing the last component of a compound vowel.
+    var previousDeletionStep: Jungseong? {
+        switch self {
+        case .ㅘ, .ㅚ:
+            return .ㅗ
+        case .ㅙ:
+            return .ㅘ
+        case .ㅝ, .ㅟ:
+            return .ㅜ
+        case .ㅞ:
+            return .ㅝ
+        case .ㅢ:
+            return .ㅡ
+        default:
+            return nil
+        }
+    }
 }
 
 // MARK: - Jongseong (종성) - 28 (including none)

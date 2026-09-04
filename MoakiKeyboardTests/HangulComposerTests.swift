@@ -1,4 +1,10 @@
 import XCTest
+
+#if SWIFT_PACKAGE
+@testable import MoakiKeyboardCore
+#else
+@testable import MoakiKeyboard
+#endif
 #if SWIFT_PACKAGE
 @testable import MoakiKeyboardCore
 #else
@@ -157,19 +163,6 @@ final class HangulComposerTests: XCTestCase {
 
     func testHelloWorld() {
         // 안녕하세요
-        let inputs: [(Choseong?, Jungseong?)] = [
-            (.ㅇ, .ㅏ), (nil, nil), // 아 + ㄴ (next)
-            (.ㄴ, nil), // attached as jongseong
-            (nil, .ㅕ), // splits to 안 + 녀
-            (.ㅇ, nil), // 녕
-            (nil, nil), // commit
-            (.ㅎ, .ㅏ), // 하
-            (.ㅅ, nil), // 세 (next syllable start)
-            (nil, .ㅔ), // 세
-            (.ㅇ, nil), // jongseong? no, starts new: 세 + ㅇ
-            (nil, .ㅛ), // 셍? no - 세요
-        ]
-
         // 안녕 needs ㄴ twice: ㅇㅏㄴ closes 안, then ㄴㅕㅇ opens 녕.
         _ = composer.inputChoseong(.ㅇ)
         _ = composer.inputJungseong(.ㅏ)
@@ -198,6 +191,8 @@ final class HangulComposerTests: XCTestCase {
         XCTAssertEqual(composer.composedText, "안녕하세요")
     }
 
+    /// Typed without an explicit commit between syllables, so this also covers
+    /// the composer closing a syllable when the next choseong arrives.
     func testThankYou() {
         // 감사합니다 = ㄱㅏㅁ / ㅅㅏ / ㅎㅏㅂ / ㄴㅣ / ㄷㅏ
         _ = composer.inputChoseong(.ㄱ)

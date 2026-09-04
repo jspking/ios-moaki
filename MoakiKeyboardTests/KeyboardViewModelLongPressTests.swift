@@ -1,4 +1,5 @@
 import XCTest
+
 #if SWIFT_PACKAGE
 @testable import MoakiKeyboardCore
 #else
@@ -53,6 +54,7 @@ final class KeyboardViewModelLongPressTests: XCTestCase {
     }
 }
 
+@MainActor
 private final class SpyKeyboardDelegate: KeyboardViewModelDelegate {
     struct ComposingUpdate: Equatable {
         let previous: String

@@ -25,7 +25,8 @@ enum HangulConstants {
 
     // Decompose a Hangul syllable into its components
     static func decomposeSyllable(_ char: Character) -> (Choseong, Jungseong, Jongseong)? {
-        guard let scalar = char.unicodeScalars.first else { return nil }
+        guard char.unicodeScalars.count == 1,
+              let scalar = char.unicodeScalars.first else { return nil }
         let value = scalar.value
 
         guard value >= syllableBase && value <= syllableEnd else { return nil }

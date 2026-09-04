@@ -4,6 +4,7 @@ import SwiftUI
 class KeyboardViewController: UIInputViewController {
 
     private var keyboardView: UIViewController?
+    private let sharedPreferences = SharedKeyboardPreferences()
     private let viewModel = KeyboardViewModel()
     private var feedbackGenerator: UIImpactFeedbackGenerator?
     private var heightConstraint: NSLayoutConstraint?
@@ -26,12 +27,14 @@ class KeyboardViewController: UIInputViewController {
         self.heightConstraint = heightConstraint
 
         viewModel.delegate = self
+        viewModel.applyDeletionUnit(sharedPreferences.deletionUnit)
         setupKeyboardView()
         setupHapticFeedback()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        viewModel.applyDeletionUnit(sharedPreferences.deletionUnit)
         heightConstraint?.constant = 260
         heightConstraint?.isActive = true
         view.setNeedsLayout()
@@ -119,6 +122,10 @@ extension KeyboardViewController: KeyboardViewModelDelegate {
 
     var documentContextAfterInput: String? {
         textDocumentProxy.documentContextAfterInput
+    }
+
+    var selectedText: String? {
+        textDocumentProxy.selectedText
     }
 
     func insertText(_ text: String) {
