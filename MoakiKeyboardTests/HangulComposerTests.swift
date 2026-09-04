@@ -1,5 +1,9 @@
 import XCTest
+#if SWIFT_PACKAGE
+@testable import MoakiKeyboardCore
+#else
 @testable import MoakiKeyboard
+#endif
 
 final class HangulComposerTests: XCTestCase {
 
@@ -166,9 +170,10 @@ final class HangulComposerTests: XCTestCase {
             (nil, .ㅛ), // 셍? no - 세요
         ]
 
-        // Simplified test
+        // 안녕 needs ㄴ twice: ㅇㅏㄴ closes 안, then ㄴㅕㅇ opens 녕.
         _ = composer.inputChoseong(.ㅇ)
         _ = composer.inputJungseong(.ㅏ)
+        _ = composer.inputChoseong(.ㄴ)
         _ = composer.inputChoseong(.ㄴ)
         _ = composer.inputJungseong(.ㅕ)
         _ = composer.inputChoseong(.ㅇ)
@@ -194,13 +199,12 @@ final class HangulComposerTests: XCTestCase {
     }
 
     func testThankYou() {
-        // 감사합니다
+        // 감사합니다 = ㄱㅏㅁ / ㅅㅏ / ㅎㅏㅂ / ㄴㅣ / ㄷㅏ
         _ = composer.inputChoseong(.ㄱ)
         _ = composer.inputJungseong(.ㅏ)
         _ = composer.inputChoseong(.ㅁ)
-        _ = composer.inputJungseong(.ㅏ)
 
-        XCTAssertEqual(composer.composedText, "가")
+        XCTAssertEqual(composer.currentComposingCharacter, "감")
 
         _ = composer.inputChoseong(.ㅅ)
         _ = composer.inputJungseong(.ㅏ)
@@ -209,16 +213,12 @@ final class HangulComposerTests: XCTestCase {
 
         _ = composer.inputChoseong(.ㅎ)
         _ = composer.inputJungseong(.ㅏ)
+        _ = composer.inputChoseong(.ㅂ)
 
         XCTAssertEqual(composer.composedText, "감사")
 
-        _ = composer.inputChoseong(.ㅂ)
-        _ = composer.inputJungseong(.ㅣ)
-
-        XCTAssertEqual(composer.composedText, "감사하")
-
         _ = composer.inputChoseong(.ㄴ)
-        _ = composer.inputJungseong(.ㅏ)
+        _ = composer.inputJungseong(.ㅣ)
 
         XCTAssertEqual(composer.composedText, "감사합")
 

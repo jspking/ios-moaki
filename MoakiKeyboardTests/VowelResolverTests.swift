@@ -1,5 +1,9 @@
 import XCTest
+#if SWIFT_PACKAGE
+@testable import MoakiKeyboardCore
+#else
 @testable import MoakiKeyboard
+#endif
 
 final class VowelResolverTests: XCTestCase {
 

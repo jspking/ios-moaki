@@ -1,5 +1,9 @@
 import XCTest
+#if SWIFT_PACKAGE
+@testable import MoakiKeyboardCore
+#else
 @testable import MoakiKeyboard
+#endif
 
 final class GestureAnalyzerTests: XCTestCase {
 
@@ -134,7 +138,7 @@ final class GestureAnalyzerTests: XCTestCase {
         analyzer.addPoint(CGPoint(x: 100, y: 100))
         analyzer.addPoint(CGPoint(x: 100, y: 70))    // ↑
         analyzer.addPoint(CGPoint(x: 109, y: 61))    // small ↗ jitter
-        analyzer.addPoint(CGPoint(x: 109, y: 45))    // back to ↑
+        analyzer.addPoint(CGPoint(x: 109, y: 35))    // back to ↑, clearly longer than the jitter
 
         XCTAssertEqual(analyzer.getDirections(), [.up, .upRight, .up])
         XCTAssertEqual(analyzer.finalizeGesture(), [.up])
