@@ -38,6 +38,11 @@ enum KeyboardMetrics {
     // apart by a deliberately longer drag. Roughly 1.3 key heights.
     static let diagonalThreshold: CGFloat = 55
     static let reversalThreshold: CGFloat = 10       // Lower threshold for opposite direction reversals
+    // How far a stroke has to double back before it counts as a reversal and
+    // earns the lower threshold above. Judging this by angle rather than by
+    // exact opposite buckets keeps a slightly skewed return stroke from
+    // suddenly needing three times the distance.
+    static let reversalMinimumAngle: CGFloat = 135
     // Require a more deliberate orthogonal turn than the initial stroke.
     // This prevents the natural hook at the end of an upward swipe from
     // promoting ㅗ (↑) to ㅘ (↑→).

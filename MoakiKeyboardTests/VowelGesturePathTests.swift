@@ -82,6 +82,17 @@ final class VowelGesturePathTests: XCTestCase {
         XCTAssertEqual(vowel([(315, long), (90, 50)]), .ㅢ)
     }
 
+    // MARK: - Skewed strokes
+
+    /// The return stroke of a Y vowel rarely comes back exactly along the line
+    /// it went out on. A skewed return still has to register.
+    func testSkewedReturnStrokesStillResolve() {
+        XCTAssertEqual(vowel([(0, 60), (215, 30), (0, 60)]), .ㅑ)
+        XCTAssertEqual(vowel([(180, 60), (35, 30), (180, 60)]), .ㅕ)
+        XCTAssertEqual(vowel([(90, 60), (285, 30), (90, 60)]), .ㅛ)
+        XCTAssertEqual(vowel([(270, 60), (105, 30), (270, 60)]), .ㅠ)
+    }
+
     // MARK: - Helpers
 
     /// Replay a path made of (bearing in degrees, length in points) segments.

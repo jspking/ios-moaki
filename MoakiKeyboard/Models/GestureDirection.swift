@@ -152,6 +152,16 @@ enum GestureDirection: String, CaseIterable {
         }
     }
 
+    /// Check whether `other` doubles back on this direction.
+    ///
+    /// Unlike `isOpposite(to:)` this is measured from the two axes, so a return
+    /// stroke that comes back a little off the line it went out on still counts.
+    /// Without that, ㅑ(→←→) drawn with a slight skew loses the lower reversal
+    /// threshold and needs a much longer stroke to register.
+    func isReversal(of other: GestureDirection) -> Bool {
+        GestureDirection.angularDistance(axisDegrees, other.axisDegrees) >= KeyboardMetrics.reversalMinimumAngle
+    }
+
     /// Check if two directions are adjacent (e.g., up and upRight are adjacent)
     func isAdjacentTo(_ other: GestureDirection) -> Bool {
         let adjacencyMap: [GestureDirection: Set<GestureDirection>] = [

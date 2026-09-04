@@ -225,6 +225,34 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertFalse(GestureDirection.left.isOpposite(to: .downLeft))
     }
 
+    // MARK: - Reversal Detection Tests
+
+    func testReversalIsJudgedByAngleNotByExactOppositeBuckets() {
+        XCTAssertTrue(GestureDirection.up.isReversal(of: .down))
+        XCTAssertTrue(GestureDirection.right.isReversal(of: .left))
+        XCTAssertTrue(GestureDirection.right.isReversal(of: .upLeft), "135° apart still doubles back")
+        XCTAssertTrue(GestureDirection.up.isReversal(of: .downRight))
+        XCTAssertTrue(GestureDirection.down.isReversal(of: .upLeft))
+    }
+
+    func testPerpendicularAndAdjacentTurnsAreNotReversals() {
+        XCTAssertFalse(GestureDirection.up.isReversal(of: .left))
+        XCTAssertFalse(GestureDirection.up.isReversal(of: .right))
+        XCTAssertFalse(GestureDirection.up.isReversal(of: .upRight))
+        XCTAssertFalse(GestureDirection.right.isReversal(of: .downRight))
+    }
+
+    /// A return stroke that comes back a little off the outgoing line used to
+    /// fall out of the opposite-bucket test and need the full turn distance.
+    func testSkewedReturnStrokeKeepsTheLowerReversalThreshold() {
+        let analyzer = GestureAnalyzer()
+        analyzer.addPoint(CGPoint(x: 150, y: 250))
+        analyzer.addPoint(CGPoint(x: 210, y: 250))   // → 60px
+        analyzer.addPoint(CGPoint(x: 189, y: 264))   // 215°, 25px: under the turn threshold
+
+        XCTAssertEqual(analyzer.getDirections(), [.right, .downLeft])
+    }
+
     // MARK: - Helpers
 
     /// Feed a straight drag sampled every few points, the way a finger reports.
