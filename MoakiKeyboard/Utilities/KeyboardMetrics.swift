@@ -27,7 +27,6 @@ enum KeyboardMetrics {
 
     // Function row
     static let functionRowHeight: CGFloat = 44
-    static let functionKeyMinimumWidth: CGFloat = 44
 
     // Gesture thresholds
     static let gestureThreshold: CGFloat = 20        // Minimum distance to register direction

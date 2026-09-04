@@ -101,7 +101,6 @@ private final class CursorSpyKeyboardDelegate: KeyboardViewModelDelegate {
         composingUpdates.append(.init(previous: previous, current: current))
     }
 
-    func switchToNextKeyboard() {}
     func triggerHapticFeedback() {}
 
     func moveCursor(byCharacterOffset offset: Int) {
