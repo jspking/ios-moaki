@@ -85,10 +85,10 @@ enum TutorialContent {
         TutorialStage(
             id: 3,
             title: "ㅡ와 ㅣ",
-            description: "오른쪽 대각선으로 슬라이드하면 ㅡ와 ㅣ가 됩니다.\n\n왼쪽 대각선(↖↙)은 ㅗ/ㅜ로 정규화되지만, 오른쪽 대각선(↗↘)은 별도의 모음입니다.",
+            description: "방향은 ㅏ와 ㅗ 그대로 두고, 훨씬 길게 밀면 ㅡ와 ㅣ가 됩니다.\n\n기울기는 상관없습니다. 대각선은 모두 위아래로 처리되므로, 얼마나 길게 미는지만 신경 쓰면 됩니다.\n\n긴 획의 기준 거리는 키보드 설정에서 조절할 수 있습니다.",
             vowelGestures: [
-                VowelGesture(vowel: "ㅣ", directions: ["↗"], label: "오른쪽 위 대각선"),
-                VowelGesture(vowel: "ㅡ", directions: ["↘"], label: "오른쪽 아래 대각선"),
+                VowelGesture(vowel: "ㅡ", directions: ["→"], label: "오른쪽으로 길게"),
+                VowelGesture(vowel: "ㅣ", directions: ["↑"], label: "위로 길게"),
             ],
             practiceLines: [
                 "기니디리미비시",
@@ -160,9 +160,9 @@ enum TutorialContent {
         TutorialStage(
             id: 8,
             title: "복합 모음 (5)",
-            description: "오른쪽 아래로 슬라이드한 뒤 왼쪽 위로 올리면 ㅢ가 됩니다.",
+            description: "오른쪽으로 길게 밀어 ㅡ를 그은 뒤, 위로 꺾어 올리면 ㅢ가 됩니다.\n\n두 번째 획은 길이를 따지지 않으므로 짧게 꺾어도 됩니다.",
             vowelGestures: [
-                VowelGesture(vowel: "ㅢ", directions: ["↘", "↖"], label: "오른쪽아래-왼쪽위"),
+                VowelGesture(vowel: "ㅢ", directions: ["→", "↑"], label: "오른쪽으로 길게-위로"),
             ],
             practiceLines: [
                 "긔늬듸릐믜",
