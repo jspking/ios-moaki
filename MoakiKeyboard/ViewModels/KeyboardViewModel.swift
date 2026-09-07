@@ -20,8 +20,8 @@ final class KeyboardViewModel: ObservableObject {
     private(set) var deletionUnit: DeletionUnit
     private var activeBackspaceDeletionUnit: DeletionUnit?
 
-    private(set) var gestureBaseLength: CGFloat = KeyboardMetrics.defaultBaseGestureLength
-    private(set) var gestureLongStrokeLength: CGFloat = KeyboardMetrics.defaultLongStrokeLength
+    private(set) var gestureBaseLength: CGFloat = SharedKeyboardPreferences.defaultBaseGestureLength
+    private(set) var gestureLongStrokeLength: CGFloat = SharedKeyboardPreferences.defaultLongStrokeLength
 
     private let backspaceRepeatInitialDelay: TimeInterval
     private let backspaceRepeatInterval: TimeInterval

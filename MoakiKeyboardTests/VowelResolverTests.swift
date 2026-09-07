@@ -209,7 +209,7 @@ final class VowelResolverTests: XCTestCase {
     }
 
     func testLongStrokeBoundaryIsInclusive() {
-        let boundary = KeyboardMetrics.defaultLongStrokeLength
+        let boundary = SharedKeyboardPreferences.defaultLongStrokeLength
         XCTAssertEqual(resolver.resolve(strokes: strokes((.right, boundary))).vowel, .ㅡ)
         XCTAssertEqual(resolver.resolve(strokes: strokes((.right, boundary - 0.5))).vowel, .ㅏ)
     }

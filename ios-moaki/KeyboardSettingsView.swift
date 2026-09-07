@@ -15,14 +15,14 @@ struct KeyboardSettingsView: View {
 
     private var longStrokeLowerBound: CGFloat {
         max(
-            KeyboardMetrics.longStrokeLengthRange.lowerBound,
-            baseGestureLength + KeyboardMetrics.minimumLongStrokeMargin
+            SharedKeyboardPreferences.longStrokeLengthRange.lowerBound,
+            baseGestureLength + SharedKeyboardPreferences.minimumLongStrokeMargin
         )
     }
 
     private var isUsingDefaultLengths: Bool {
-        baseGestureLength == KeyboardMetrics.defaultBaseGestureLength
-            && longStrokeLength == KeyboardMetrics.defaultLongStrokeLength
+        baseGestureLength == SharedKeyboardPreferences.defaultBaseGestureLength
+            && longStrokeLength == SharedKeyboardPreferences.defaultLongStrokeLength
     }
 
     var body: some View {
@@ -51,26 +51,26 @@ struct KeyboardSettingsView: View {
                 lengthSlider(
                     title: "기본 모음 최소 거리",
                     value: $baseGestureLength,
-                    range: KeyboardMetrics.baseGestureLengthRange,
+                    range: SharedKeyboardPreferences.baseGestureLengthRange,
                     description: "ㅏ ㅓ ㅗ ㅜ 를 인식하기 시작하는 거리입니다. 짧게 잡으면 살짝만 밀어도 모음이 붙고, 길게 잡으면 자음만 누르기가 쉬워집니다."
                 )
 
                 lengthSlider(
                     title: "ㅡ ㅣ 긴 획 기준",
                     value: $longStrokeLength,
-                    range: longStrokeLowerBound...KeyboardMetrics.longStrokeLengthRange.upperBound,
+                    range: longStrokeLowerBound...SharedKeyboardPreferences.longStrokeLengthRange.upperBound,
                     description: "이 거리를 넘겨 밀면 ㅏ 대신 ㅡ, ㅗ 대신 ㅣ 가 입력됩니다."
                 )
 
                 Button("기본값으로 되돌리기") {
-                    baseGestureLength = KeyboardMetrics.defaultBaseGestureLength
-                    longStrokeLength = KeyboardMetrics.defaultLongStrokeLength
+                    baseGestureLength = SharedKeyboardPreferences.defaultBaseGestureLength
+                    longStrokeLength = SharedKeyboardPreferences.defaultLongStrokeLength
                 }
                 .disabled(isUsingDefaultLengths)
             } header: {
                 Text("제스처 길이")
             } footer: {
-                Text("긴 획 기준은 항상 기본 거리보다 \(Int(KeyboardMetrics.minimumLongStrokeMargin))pt 이상 크게 유지됩니다.")
+                Text("긴 획 기준은 항상 기본 거리보다 \(Int(SharedKeyboardPreferences.minimumLongStrokeMargin))pt 이상 크게 유지됩니다.")
             }
 
             Section("모음 입력 방법") {

@@ -10,6 +10,22 @@ protocol KeyboardPreferencesBacking: AnyObject {
 extension UserDefaults: KeyboardPreferencesBacking {}
 
 struct SharedKeyboardPreferences {
+    // Gesture length limits live here rather than in KeyboardMetrics because
+    // this file is a member of both the app and the keyboard extension, and the
+    // settings screen needs them.
+    static let defaultBaseGestureLength: CGFloat = 20
+    static let defaultLongStrokeLength: CGFloat = 70
+    static let baseGestureLengthRange: ClosedRange<CGFloat> = 10...40
+    static let longStrokeLengthRange: ClosedRange<CGFloat> = 40...140
+    /// A long stroke must stay clearly above the base length, otherwise short
+    /// strokes become unreachable.
+    static let minimumLongStrokeMargin: CGFloat = 10
+    /// The base length rescales the other two direction thresholds, keeping the
+    /// ratios the defaults were tuned with.
+    /// `KeyboardMetricsLayoutTests` pins these against KeyboardMetrics.
+    static let reversalThresholdRatio: CGFloat = 0.5
+    static let directionChangeThresholdRatio: CGFloat = 1.5
+
     static let appGroupIdentifier = "group.vkehfdl1.ios-moaki"
     static let deletionUnitKey = "backspaceDeletionUnit"
     static let baseGestureLengthKey = "baseGestureLength"
@@ -43,12 +59,12 @@ struct SharedKeyboardPreferences {
     var baseGestureLength: CGFloat {
         get {
             let stored = storedLength(forKey: Self.baseGestureLengthKey)
-                ?? KeyboardMetrics.defaultBaseGestureLength
-            return stored.clamped(to: KeyboardMetrics.baseGestureLengthRange)
+                ?? Self.defaultBaseGestureLength
+            return stored.clamped(to: Self.baseGestureLengthRange)
         }
         nonmutating set {
             store?.set(
-                Double(newValue.clamped(to: KeyboardMetrics.baseGestureLengthRange)),
+                Double(newValue.clamped(to: Self.baseGestureLengthRange)),
                 forKey: Self.baseGestureLengthKey
             )
         }
@@ -60,7 +76,7 @@ struct SharedKeyboardPreferences {
     var longStrokeLength: CGFloat {
         get {
             let stored = storedLength(forKey: Self.longStrokeLengthKey)
-                ?? KeyboardMetrics.defaultLongStrokeLength
+                ?? Self.defaultLongStrokeLength
             return Self.clampLongStrokeLength(stored, baseGestureLength: baseGestureLength)
         }
         nonmutating set {
@@ -73,16 +89,16 @@ struct SharedKeyboardPreferences {
     }
 
     func resetGestureLengths() {
-        baseGestureLength = KeyboardMetrics.defaultBaseGestureLength
-        longStrokeLength = KeyboardMetrics.defaultLongStrokeLength
+        baseGestureLength = Self.defaultBaseGestureLength
+        longStrokeLength = Self.defaultLongStrokeLength
     }
 
     static func clampLongStrokeLength(_ value: CGFloat, baseGestureLength: CGFloat) -> CGFloat {
         let floorValue = max(
-            KeyboardMetrics.longStrokeLengthRange.lowerBound,
-            baseGestureLength + KeyboardMetrics.minimumLongStrokeMargin
+            Self.longStrokeLengthRange.lowerBound,
+            baseGestureLength + Self.minimumLongStrokeMargin
         )
-        return value.clamped(to: floorValue...KeyboardMetrics.longStrokeLengthRange.upperBound)
+        return value.clamped(to: floorValue...Self.longStrokeLengthRange.upperBound)
     }
 
     /// `object(forKey:)` rather than `double(forKey:)` so an unset value stays

@@ -49,8 +49,8 @@ class GestureAnalyzer {
     /// the ratios the defaults were tuned with.
     func configure(baseLength: CGFloat) {
         threshold = baseLength
-        reversalThreshold = baseLength * KeyboardMetrics.reversalThresholdRatio
-        directionChangeThreshold = baseLength * KeyboardMetrics.directionChangeThresholdRatio
+        reversalThreshold = baseLength * SharedKeyboardPreferences.reversalThresholdRatio
+        directionChangeThreshold = baseLength * SharedKeyboardPreferences.directionChangeThresholdRatio
     }
 
     func reset() {

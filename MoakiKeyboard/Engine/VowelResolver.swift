@@ -12,7 +12,7 @@ class VowelResolver {
         let hasMoreMatches: Bool
     }
 
-    init(longStrokeLength: CGFloat = KeyboardMetrics.defaultLongStrokeLength) {
+    init(longStrokeLength: CGFloat = SharedKeyboardPreferences.defaultLongStrokeLength) {
         self.longStrokeLength = longStrokeLength
     }
 

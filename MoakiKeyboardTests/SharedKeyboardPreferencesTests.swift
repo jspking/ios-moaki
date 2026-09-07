@@ -34,8 +34,8 @@ final class SharedKeyboardPreferencesTests: XCTestCase {
     func testGestureLengthDefaultsMatchCurrentTuning() {
         let preferences = SharedKeyboardPreferences(store: InMemoryPreferencesStore())
 
-        XCTAssertEqual(preferences.baseGestureLength, KeyboardMetrics.defaultBaseGestureLength)
-        XCTAssertEqual(preferences.longStrokeLength, KeyboardMetrics.defaultLongStrokeLength)
+        XCTAssertEqual(preferences.baseGestureLength, SharedKeyboardPreferences.defaultBaseGestureLength)
+        XCTAssertEqual(preferences.longStrokeLength, SharedKeyboardPreferences.defaultLongStrokeLength)
     }
 
     func testPersistsGestureLengths() throws {
@@ -56,13 +56,13 @@ final class SharedKeyboardPreferencesTests: XCTestCase {
         let preferences = SharedKeyboardPreferences(store: InMemoryPreferencesStore())
 
         preferences.baseGestureLength = 5
-        XCTAssertEqual(preferences.baseGestureLength, KeyboardMetrics.baseGestureLengthRange.lowerBound)
+        XCTAssertEqual(preferences.baseGestureLength, SharedKeyboardPreferences.baseGestureLengthRange.lowerBound)
 
         preferences.baseGestureLength = 500
-        XCTAssertEqual(preferences.baseGestureLength, KeyboardMetrics.baseGestureLengthRange.upperBound)
+        XCTAssertEqual(preferences.baseGestureLength, SharedKeyboardPreferences.baseGestureLengthRange.upperBound)
 
         preferences.longStrokeLength = 5000
-        XCTAssertEqual(preferences.longStrokeLength, KeyboardMetrics.longStrokeLengthRange.upperBound)
+        XCTAssertEqual(preferences.longStrokeLength, SharedKeyboardPreferences.longStrokeLengthRange.upperBound)
     }
 
     func testLongStrokeLengthStaysClearOfBaseLength() {
@@ -73,7 +73,7 @@ final class SharedKeyboardPreferencesTests: XCTestCase {
 
         XCTAssertEqual(
             preferences.longStrokeLength,
-            40 + KeyboardMetrics.minimumLongStrokeMargin
+            40 + SharedKeyboardPreferences.minimumLongStrokeMargin
         )
     }
 
@@ -95,16 +95,16 @@ final class SharedKeyboardPreferencesTests: XCTestCase {
         preferences.longStrokeLength = 130
         preferences.resetGestureLengths()
 
-        XCTAssertEqual(preferences.baseGestureLength, KeyboardMetrics.defaultBaseGestureLength)
-        XCTAssertEqual(preferences.longStrokeLength, KeyboardMetrics.defaultLongStrokeLength)
+        XCTAssertEqual(preferences.baseGestureLength, SharedKeyboardPreferences.defaultBaseGestureLength)
+        XCTAssertEqual(preferences.longStrokeLength, SharedKeyboardPreferences.defaultLongStrokeLength)
     }
 
     func testMissingStoreFallsBackToGestureLengthDefaults() {
         let preferences = SharedKeyboardPreferences(store: nil)
 
         preferences.baseGestureLength = 35
-        XCTAssertEqual(preferences.baseGestureLength, KeyboardMetrics.defaultBaseGestureLength)
-        XCTAssertEqual(preferences.longStrokeLength, KeyboardMetrics.defaultLongStrokeLength)
+        XCTAssertEqual(preferences.baseGestureLength, SharedKeyboardPreferences.defaultBaseGestureLength)
+        XCTAssertEqual(preferences.longStrokeLength, SharedKeyboardPreferences.defaultLongStrokeLength)
     }
 
     func testMissingStoreFallsBackWithoutCrashingOnWrite() {
