@@ -162,12 +162,74 @@ final class VowelResolverTests: XCTestCase {
 
     // MARK: - Special Vowels
 
-    func testSpecialVowels() {
-        // ㅢ = ↘↖ (오른쪽아래-왼쪽위)
-        XCTAssertEqual(resolver.resolve(directions: [.downRight, .upLeft]).vowel, .ㅢ)
+    func testDiagonalsNoLongerSelectVowelsOfTheirOwn() {
+        // ㅡ, ㅣ and ㅢ moved to long strokes. Every diagonal now folds onto the
+        // vertical axis, so the old diagonal shapes resolve as ㅗ/ㅜ families.
+        XCTAssertEqual(resolver.resolve(directions: [.downRight]).vowel, .ㅜ)
+        XCTAssertEqual(resolver.resolve(directions: [.upRight]).vowel, .ㅗ)
+        XCTAssertEqual(resolver.resolve(directions: [.downRight, .up]).vowel, .ㅟ)
+    }
 
-        // ㅢ = ↘↑ (오른쪽아래-위)
-        XCTAssertEqual(resolver.resolve(directions: [.downRight, .up]).vowel, .ㅢ)
+    // MARK: - Long Stroke Vowels
+
+    private func strokes(_ items: (GestureDirection, CGFloat)...) -> [GestureStroke] {
+        items.map { GestureStroke(direction: $0.0, length: $0.1) }
+    }
+
+    func testLongFirstStrokeProducesEuAndI() {
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 90))).vowel, .ㅡ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 90))).vowel, .ㅣ)
+    }
+
+    func testShortFirstStrokeKeepsBasicVowels() {
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 30))).vowel, .ㅏ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 30))).vowel, .ㅗ)
+    }
+
+    func testLongLeftAndDownStayBasicVowels() {
+        // Only → and ↑ carry a long-stroke meaning.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 120))).vowel, .ㅓ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.down, 120))).vowel, .ㅜ)
+    }
+
+    func testLongRightThenUpProducesEuI() {
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 90), (.up, 25))).vowel, .ㅢ)
+    }
+
+    func testLongFirstStrokeFallsBackToCompoundVowels() {
+        // A long first stroke that continues into another shape keeps the
+        // length-agnostic reading instead of being forced into ㅡ or ㅣ.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 90), (.left, 40))).vowel, .ㅐ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 90), (.right, 40))).vowel, .ㅘ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 90), (.down, 40))).vowel, .ㅚ)
+        XCTAssertEqual(
+            resolver.resolve(strokes: strokes((.right, 90), (.left, 40), (.right, 40))).vowel,
+            .ㅑ
+        )
+    }
+
+    func testLongStrokeBoundaryIsInclusive() {
+        let boundary = KeyboardMetrics.defaultLongStrokeLength
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, boundary))).vowel, .ㅡ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, boundary - 0.5))).vowel, .ㅏ)
+    }
+
+    func testLongStrokeThresholdIsConfigurable() {
+        resolver.configure(longStrokeLength: 120)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 90))).vowel, .ㅏ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 130))).vowel, .ㅡ)
+    }
+
+    func testLongTiltedStrokeStillResolvesByAxis() {
+        // A long stroke tilted into ↗ folds onto ↑, so it is ㅣ.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.upRight, 90))).vowel, .ㅣ)
+        // ↘ folds onto ↓, which has no long-stroke meaning.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.downRight, 90))).vowel, .ㅜ)
+    }
+
+    func testDirectionOnlyAPINeverProducesLongStrokeVowels() {
+        XCTAssertEqual(resolver.resolve(directions: [.right]).vowel, .ㅏ)
+        XCTAssertEqual(resolver.resolve(directions: [.up]).vowel, .ㅗ)
     }
 
     // MARK: - Edge Cases
@@ -186,10 +248,10 @@ final class VowelResolverTests: XCTestCase {
         XCTAssertTrue(result.hasMoreMatches)
     }
 
-    func testNoMatch() {
-        // ↗ should resolve to ㅣ
+    func testShortUpRightResolvesToO() {
+        // ↗ folds onto ↑, so a short stroke is ㅗ regardless of tilt.
         let result = resolver.resolve(directions: [.upRight])
-        XCTAssertEqual(result.vowel, .ㅣ)
+        XCTAssertEqual(result.vowel, .ㅗ)
     }
 
     func testRepeatCollapseAndTrailingDiagonalNormalization() {
