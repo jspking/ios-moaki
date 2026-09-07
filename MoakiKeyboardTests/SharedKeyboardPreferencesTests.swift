@@ -45,6 +45,10 @@ private final class InMemoryPreferencesStore: KeyboardPreferencesBacking {
         values[defaultName] as? String
     }
 
+    func object(forKey defaultName: String) -> Any? {
+        values[defaultName]
+    }
+
     func set(_ value: Any?, forKey defaultName: String) {
         values[defaultName] = value
     }

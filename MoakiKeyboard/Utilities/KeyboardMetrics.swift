@@ -38,6 +38,22 @@ enum KeyboardMetrics {
     static let directionChangeThreshold: CGFloat = 30
     static let gestureTimeout: TimeInterval = 0.5    // Max time between direction changes
 
+    // The three thresholds above form a fixed 1 : 0.5 : 1.5 ratio. The gesture
+    // length setting exposes only the base value and rescales the other two, so
+    // the tuning that the defaults encode survives any user adjustment.
+    static let reversalThresholdRatio: CGFloat = reversalThreshold / gestureThreshold
+    static let directionChangeThresholdRatio: CGFloat = directionChangeThreshold / gestureThreshold
+
+    // Long-stroke vowels: a first stroke at or beyond this distance means ㅡ/ㅣ
+    // instead of ㅏ/ㅗ. Adjustable in the app's keyboard settings.
+    static let defaultBaseGestureLength: CGFloat = gestureThreshold
+    static let defaultLongStrokeLength: CGFloat = 70
+    static let baseGestureLengthRange: ClosedRange<CGFloat> = 10...40
+    static let longStrokeLengthRange: ClosedRange<CGFloat> = 40...140
+    /// A long stroke must stay clearly above the base length, otherwise short
+    /// strokes become unreachable.
+    static let minimumLongStrokeMargin: CGFloat = 10
+
     // Space cursor gesture tuning values
     static let spaceDragThreshold: CGFloat = 8
     static let spaceLongPressDuration: TimeInterval = 0.35

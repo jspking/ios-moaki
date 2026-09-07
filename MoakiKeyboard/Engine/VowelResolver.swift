@@ -1,40 +1,86 @@
 import Foundation
+import CoreGraphics
 
 class VowelResolver {
     private let patternTrie = VowelPattern.patternTrie
+    private let longFirstStrokeTrie = VowelPattern.longFirstStrokeTrie
+
+    private var longStrokeLength: CGFloat
 
     struct Resolution {
         let vowel: Jungseong?
         let hasMoreMatches: Bool
     }
 
-    func resolve(directions: [GestureDirection]) -> Resolution {
-        guard !directions.isEmpty else {
+    init(longStrokeLength: CGFloat = KeyboardMetrics.defaultLongStrokeLength) {
+        self.longStrokeLength = longStrokeLength
+    }
+
+    func configure(longStrokeLength: CGFloat) {
+        self.longStrokeLength = longStrokeLength
+    }
+
+    func resolve(strokes: [GestureStroke]) -> Resolution {
+        guard !strokes.isEmpty else {
             return Resolution(vowel: nil, hasMoreMatches: false)
         }
 
-        let normalized = normalizeForMatching(directions)
+        let normalized = normalizeForMatching(strokes.map { $0.direction })
+
+        if startsWithLongStroke(strokes),
+           let resolution = resolveWithLongFirstStroke(normalized) {
+            return resolution
+        }
+
         let match = patternTrie.match(normalized)
         return Resolution(vowel: match.vowel, hasMoreMatches: match.hasLongerMatch)
     }
 
+    /// Length-agnostic entry point. Every stroke is treated as short, so ㅡ, ㅣ
+    /// and ㅢ are never produced.
+    func resolve(directions: [GestureDirection]) -> Resolution {
+        resolve(strokes: directions.map { GestureStroke(direction: $0, length: 0) })
+    }
+
     // For real-time feedback during gesture
+    func peekVowel(strokes: [GestureStroke]) -> Jungseong? {
+        resolve(strokes: strokes).vowel
+    }
+
     func peekVowel(directions: [GestureDirection]) -> Jungseong? {
-        guard !directions.isEmpty else { return nil }
-        let normalized = normalizeForMatching(directions)
-        return patternTrie.match(normalized).vowel
+        resolve(directions: directions).vowel
     }
 
     // Check if current directions could potentially match a vowel
+    func hasPotentialMatch(strokes: [GestureStroke]) -> Bool {
+        guard !strokes.isEmpty else { return false }
+        let resolution = resolve(strokes: strokes)
+        return resolution.vowel != nil || resolution.hasMoreMatches
+    }
+
     func hasPotentialMatch(directions: [GestureDirection]) -> Bool {
-        guard !directions.isEmpty else { return false }
-        let normalized = normalizeForMatching(directions)
-        let match = patternTrie.match(normalized)
-        return match.vowel != nil || match.hasLongerMatch
+        hasPotentialMatch(strokes: directions.map { GestureStroke(direction: $0, length: 0) })
+    }
+
+    private func startsWithLongStroke(_ strokes: [GestureStroke]) -> Bool {
+        guard let first = strokes.first else { return false }
+        return first.length >= longStrokeLength
+    }
+
+    /// A long-stroke pattern only wins when it accounts for the entire gesture.
+    /// Otherwise the caller falls back to the length-agnostic table.
+    private func resolveWithLongFirstStroke(_ normalized: [GestureDirection]) -> Resolution? {
+        let match = longFirstStrokeTrie.match(normalized)
+        guard let vowel = match.vowel, match.consumedCount == normalized.count else {
+            return nil
+        }
+        return Resolution(vowel: vowel, hasMoreMatches: match.hasLongerMatch)
     }
 
     /// Normalization rules:
-    /// 1. First stroke keeps 8-direction intent, except ↖/↙ are canonicalized to ↑/↓.
+    /// 1. The first stroke's diagonals are canonicalized onto the vertical axis
+    ///    (↖ ↗ → ↑, ↙ ↘ → ↓), so the tilt of a stroke never decides which vowel
+    ///    it is — only its direction and length do.
     /// 2. From the second stroke onward, diagonals are mapped to a single cardinal axis.
     ///    A final diagonal that continues the previous vertical stroke stays vertical,
     ///    so natural finger drift does not become an unintended compound vowel.
@@ -68,9 +114,9 @@ class VowelResolver {
 
     private func normalizeFirstStroke(_ direction: GestureDirection) -> GestureDirection {
         switch direction {
-        case .upLeft:
+        case .upLeft, .upRight:
             return .up
-        case .downLeft:
+        case .downLeft, .downRight:
             return .down
         default:
             return direction
