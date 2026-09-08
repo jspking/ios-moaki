@@ -85,10 +85,22 @@ enum TutorialContent {
         TutorialStage(
             id: 3,
             title: "ㅡ와 ㅣ",
-            description: "방향은 ㅏ와 ㅗ 그대로 두고, 훨씬 길게 밀면 ㅡ와 ㅣ가 됩니다.\n\n기울기는 상관없습니다. 대각선은 모두 위아래로 처리되므로, 얼마나 길게 미는지만 신경 쓰면 됩니다.\n\n긴 획의 기준 거리는 키보드 설정에서 조절할 수 있습니다.",
+            description: "방향은 ㅏ와 ㅗ 그대로 두고, 훨씬 길게 밀면 ㅡ와 ㅣ가 됩니다.\n\n긴 획은 어느 쪽으로 그어도 같습니다. ㅡ는 좌우 어느 방향이든, ㅣ는 위아래 어느 방향이든 됩니다. 기울기도 상관없습니다.\n\n긴 획의 기준 거리는 키보드 설정에서 조절할 수 있습니다.",
             vowelGestures: [
-                VowelGesture(vowel: "ㅡ", directions: ["→"], label: "오른쪽으로 길게"),
-                VowelGesture(vowel: "ㅣ", directions: ["↑"], label: "위로 길게"),
+                VowelGesture(
+                    vowel: "ㅡ",
+                    directions: ["→"],
+                    label: "가로로 길게",
+                    altDirections: ["←"],
+                    altLabel: "왼쪽으로 길게"
+                ),
+                VowelGesture(
+                    vowel: "ㅣ",
+                    directions: ["↑"],
+                    label: "세로로 길게",
+                    altDirections: ["↓"],
+                    altLabel: "아래로 길게"
+                ),
             ],
             practiceLines: [
                 "기니디리미비시",
@@ -160,9 +172,15 @@ enum TutorialContent {
         TutorialStage(
             id: 8,
             title: "복합 모음 (5)",
-            description: "오른쪽으로 길게 밀어 ㅡ를 그은 뒤, 위로 꺾어 올리면 ㅢ가 됩니다.\n\n두 번째 획은 길이를 따지지 않으므로 짧게 꺾어도 됩니다.",
+            description: "가로로 길게 밀어 ㅡ를 그은 뒤, 위나 아래로 꺾으면 ㅢ가 됩니다.\n\n두 획 모두 방향을 가리지 않습니다. 두 번째 획은 길이도 따지지 않으므로 짧게 꺾어도 됩니다.",
             vowelGestures: [
-                VowelGesture(vowel: "ㅢ", directions: ["→", "↑"], label: "오른쪽으로 길게-위로"),
+                VowelGesture(
+                    vowel: "ㅢ",
+                    directions: ["→", "↑"],
+                    label: "가로로 길게-세로로",
+                    altDirections: ["←", "↓"],
+                    altLabel: "왼쪽으로 길게-아래로"
+                ),
             ],
             practiceLines: [
                 "긔늬듸릐믜",

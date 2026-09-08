@@ -44,10 +44,21 @@ struct VowelPattern {
     /// long stroke that continues into some other shape (long →← for ㅐ, long
     /// ↑→ for ㅘ) falls back to the length-agnostic table instead of being
     /// forced into ㅡ or ㅣ.
+    ///
+    /// A long stroke means the same vowel whichever way it is drawn: ㅡ along
+    /// either horizontal direction, ㅣ along either vertical one. ㅢ follows the
+    /// same rule on both of its strokes, so all four turns produce it.
     static let longFirstStrokePatterns: [VowelPattern] = [
         VowelPattern(.ㅡ, .right),                        // 긴 →
+        VowelPattern(.ㅡ, .left),                         // 긴 ←
         VowelPattern(.ㅣ, .up),                           // 긴 ↑
-        VowelPattern(.ㅢ, .right, .up),                   // 긴 → 다음 ↑ (ㅡ + ㅣ)
+        VowelPattern(.ㅣ, .down),                         // 긴 ↓
+
+        // ㅢ = ㅡ + ㅣ: a long horizontal stroke, then a vertical turn.
+        VowelPattern(.ㅢ, .right, .up),                   // 긴 → 다음 ↑
+        VowelPattern(.ㅢ, .right, .down),                 // 긴 → 다음 ↓
+        VowelPattern(.ㅢ, .left, .up),                    // 긴 ← 다음 ↑
+        VowelPattern(.ㅢ, .left, .down),                  // 긴 ← 다음 ↓
     ]
 
     // Build a trie for efficient pattern matching

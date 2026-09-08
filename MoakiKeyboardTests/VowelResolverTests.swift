@@ -186,14 +186,43 @@ final class VowelResolverTests: XCTestCase {
         XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 30))).vowel, .ㅗ)
     }
 
-    func testLongLeftAndDownStayBasicVowels() {
-        // Only → and ↑ carry a long-stroke meaning.
-        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 120))).vowel, .ㅓ)
-        XCTAssertEqual(resolver.resolve(strokes: strokes((.down, 120))).vowel, .ㅜ)
+    func testLongStrokeIgnoresWhichWayItIsDrawn() {
+        // ㅡ along either horizontal direction, ㅣ along either vertical one.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 120))).vowel, .ㅡ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 120))).vowel, .ㅡ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 120))).vowel, .ㅣ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.down, 120))).vowel, .ㅣ)
     }
 
-    func testLongRightThenUpProducesEuI() {
+    func testShortStrokeStillDistinguishesEveryDirection() {
+        // The bidirectional rule must not leak into short strokes.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 30))).vowel, .ㅏ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 30))).vowel, .ㅓ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.up, 30))).vowel, .ㅗ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.down, 30))).vowel, .ㅜ)
+    }
+
+    func testEuIAcceptsEveryTurnOfTheTwoStrokes() {
         XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 90), (.up, 25))).vowel, .ㅢ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.right, 90), (.down, 25))).vowel, .ㅢ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 90), (.up, 25))).vowel, .ㅢ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 90), (.down, 25))).vowel, .ㅢ)
+    }
+
+    func testCompoundVowelsSurviveALongFirstStrokeInEitherDirection() {
+        // The long table only wins when it consumes the whole gesture, so these
+        // keep their length-agnostic reading.
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.left, 120), (.right, 40))).vowel, .ㅔ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.down, 120), (.left, 40))).vowel, .ㅝ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.down, 120), (.up, 40))).vowel, .ㅟ)
+        XCTAssertEqual(
+            resolver.resolve(strokes: strokes((.down, 120), (.up, 40), (.down, 40))).vowel,
+            .ㅠ
+        )
+        XCTAssertEqual(
+            resolver.resolve(strokes: strokes((.left, 120), (.right, 40), (.left, 40))).vowel,
+            .ㅕ
+        )
     }
 
     func testLongFirstStrokeFallsBackToCompoundVowels() {
@@ -221,10 +250,12 @@ final class VowelResolverTests: XCTestCase {
     }
 
     func testLongTiltedStrokeStillResolvesByAxis() {
-        // A long stroke tilted into ↗ folds onto ↑, so it is ㅣ.
+        // Every diagonal folds onto the vertical axis, and both vertical
+        // directions are ㅣ once the stroke is long.
         XCTAssertEqual(resolver.resolve(strokes: strokes((.upRight, 90))).vowel, .ㅣ)
-        // ↘ folds onto ↓, which has no long-stroke meaning.
-        XCTAssertEqual(resolver.resolve(strokes: strokes((.downRight, 90))).vowel, .ㅜ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.upLeft, 90))).vowel, .ㅣ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.downRight, 90))).vowel, .ㅣ)
+        XCTAssertEqual(resolver.resolve(strokes: strokes((.downLeft, 90))).vowel, .ㅣ)
     }
 
     func testDirectionOnlyAPINeverProducesLongStrokeVowels() {

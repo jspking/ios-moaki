@@ -59,7 +59,7 @@ struct KeyboardSettingsView: View {
                     title: "ㅡ ㅣ 긴 획 기준",
                     value: $longStrokeLength,
                     range: longStrokeLowerBound...SharedKeyboardPreferences.longStrokeLengthRange.upperBound,
-                    description: "이 거리를 넘겨 밀면 ㅏ 대신 ㅡ, ㅗ 대신 ㅣ 가 입력됩니다."
+                    description: "이 거리를 넘겨 밀면 ㅏ ㅓ 대신 ㅡ, ㅗ ㅜ 대신 ㅣ 가 입력됩니다. 긴 획은 방향을 가리지 않습니다."
                 )
 
                 Button("기본값으로 되돌리기") {
@@ -75,9 +75,9 @@ struct KeyboardSettingsView: View {
 
             Section("모음 입력 방법") {
                 LabeledContent("ㅏ ㅓ ㅗ ㅜ", value: "짧게 → ← ↑ ↓")
-                LabeledContent("ㅡ", value: "길게 →")
-                LabeledContent("ㅣ", value: "길게 ↑")
-                LabeledContent("ㅢ", value: "길게 → 다음 ↑")
+                LabeledContent("ㅡ", value: "길게 → 또는 ←")
+                LabeledContent("ㅣ", value: "길게 ↑ 또는 ↓")
+                LabeledContent("ㅢ", value: "길게 가로획 다음 세로획")
             }
         }
         .navigationTitle("키보드 설정")
