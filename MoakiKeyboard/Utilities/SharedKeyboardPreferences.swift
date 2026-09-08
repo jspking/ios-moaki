@@ -26,7 +26,7 @@ struct SharedKeyboardPreferences {
     static let reversalThresholdRatio: CGFloat = 0.5
     static let directionChangeThresholdRatio: CGFloat = 1.5
 
-    static let appGroupIdentifier = "group.com.zigbang.moaki"
+    static let appGroupIdentifier = "group.com.zigbang.chester.moaki.local"
     static let deletionUnitKey = "backspaceDeletionUnit"
     static let baseGestureLengthKey = "baseGestureLength"
     static let longStrokeLengthKey = "longStrokeLength"
