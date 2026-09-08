@@ -173,7 +173,7 @@ enum TutorialContent {
             description: "ㅘ/ㅝ 끝에서 한 번 더 꺾으면 ㅙ/ㅞ가 됩니다.",
             vowelGestures: [
                 VowelGesture(vowel: "ㅙ", directions: ["↑", "→", "←"], label: "위-오른쪽-왼쪽"),
-                VowelGesture(vowel: "ㅞ", directions: ["↓", "→", "←"], label: "아래-오른쪽-왼쪽"),
+                VowelGesture(vowel: "ㅞ", directions: ["↓", "←", "→"], label: "아래-왼쪽-오른쪽"),
             ],
             practiceLines: [
                 "왜웨",
