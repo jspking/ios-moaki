@@ -40,19 +40,31 @@ enum TutorialContent {
         TutorialStage(
             id: 0,
             title: "모아키에 오신 걸 환영합니다",
-            description: "모아키는 자음 키를 누르고 슬라이드하여 모음을 입력하는 제스처 기반 한글 키보드입니다.\n\n자음 키 위에서 방향을 바꿔가며 드래그하면 다양한 모음을 조합할 수 있습니다."
+            description: "모아키는 자음 키를 누르고 슬라이드하여 모음을 입력하는 제스처 기반 한글 키보드입니다.\n\n자음 키 위에서 방향을 바꿔가며 드래그하면 다양한 모음을 조합할 수 있습니다.\n\n방향뿐 아니라 획을 얼마나 길게 미는지도 모음을 가릅니다. 짧게 밀면 ㅏ ㅓ ㅗ ㅜ, 길게 밀면 ㅡ와 ㅣ가 됩니다."
         ),
 
         // Stage 1: Basic Vowels
         TutorialStage(
             id: 1,
             title: "기본 모음",
-            description: "자음 키를 누른 채로 상하좌우로 슬라이드하세요.\n왼쪽 대각선(↖↙)은 위/아래로 자동 정규화됩니다.",
+            description: "자음 키를 누른 채로 상하좌우로 짧게 슬라이드하세요.\n\n대각선은 네 방향 모두 위나 아래로 정규화됩니다. ↖와 ↗는 ㅗ, ↙와 ↘는 ㅜ가 되므로 기울기를 신경 쓸 필요가 없습니다.\n\n너무 길게 밀면 ㅡ나 ㅣ가 되니, 이 단계에서는 짧게 미세요. 긴 획은 다음 단계에서 배웁니다.",
             vowelGestures: [
-                VowelGesture(vowel: "ㅏ", directions: ["→"], label: "오른쪽"),
-                VowelGesture(vowel: "ㅓ", directions: ["←"], label: "왼쪽"),
-                VowelGesture(vowel: "ㅗ", directions: ["↑"], label: "위", altDirections: ["↖"], altLabel: "왼쪽 위 대각선"),
-                VowelGesture(vowel: "ㅜ", directions: ["↓"], label: "아래", altDirections: ["↙"], altLabel: "왼쪽 아래 대각선"),
+                VowelGesture(vowel: "ㅏ", directions: ["→"], label: "짧게 오른쪽"),
+                VowelGesture(vowel: "ㅓ", directions: ["←"], label: "짧게 왼쪽"),
+                VowelGesture(
+                    vowel: "ㅗ",
+                    directions: ["↑"],
+                    label: "짧게 위",
+                    altDirections: ["↖", "↗"],
+                    altLabel: "위쪽 대각선"
+                ),
+                VowelGesture(
+                    vowel: "ㅜ",
+                    directions: ["↓"],
+                    label: "짧게 아래",
+                    altDirections: ["↙", "↘"],
+                    altLabel: "아래쪽 대각선"
+                ),
             ],
             practiceLines: [
                 "가나다라마바사",
@@ -85,7 +97,7 @@ enum TutorialContent {
         TutorialStage(
             id: 3,
             title: "ㅡ와 ㅣ",
-            description: "방향은 ㅏ와 ㅗ 그대로 두고, 훨씬 길게 밀면 ㅡ와 ㅣ가 됩니다.\n\n긴 획은 어느 쪽으로 그어도 같습니다. ㅡ는 좌우 어느 방향이든, ㅣ는 위아래 어느 방향이든 됩니다. 기울기도 상관없습니다.\n\n긴 획의 기준 거리는 키보드 설정에서 조절할 수 있습니다.",
+            description: "앞 단계와 같은 방향으로, 훨씬 길게 미세요.\n\n가로로 길게 밀면 ㅡ, 세로로 길게 밀면 ㅣ가 됩니다. 어느 쪽으로 긋든 같습니다. ㅡ는 오른쪽이든 왼쪽이든, ㅣ는 위든 아래든 됩니다. 기울기도 상관없습니다.\n\n짧게 밀면 그대로 ㅏ ㅓ ㅗ ㅜ 입니다. 긴 획의 기준 거리는 키보드 설정에서 조절할 수 있습니다.",
             vowelGestures: [
                 VowelGesture(
                     vowel: "ㅡ",
