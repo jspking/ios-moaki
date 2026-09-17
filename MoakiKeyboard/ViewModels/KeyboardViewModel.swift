@@ -127,14 +127,12 @@ final class KeyboardViewModel: ObservableObject {
         triggerHapticFeedback()
     }
 
-    func switchKeyboard() {
-        prepareForKeyboardSwitch()
-        delegate?.switchToNextKeyboard()
-    }
-
-    func prepareForKeyboardSwitch() {
-        stopBackspaceRepeat()
+    /// The document already contains the composing character. Release the
+    /// composer when iOS dismisses or switches the keyboard so it isn't
+    /// inserted a second time when the keyboard returns.
+    func prepareForDismissal() {
         commitCurrent()
+        resetGestureState()
     }
 
     func beginBackspacePress() {
@@ -448,7 +446,6 @@ protocol KeyboardViewModelDelegate: AnyObject {
     func deleteBackward()
     func updateComposingText(from previous: String, to current: String)
     func moveCursor(byCharacterOffset offset: Int)
-    func switchToNextKeyboard()
     func triggerHapticFeedback()
 }
 
