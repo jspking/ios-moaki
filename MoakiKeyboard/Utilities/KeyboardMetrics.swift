@@ -80,7 +80,11 @@ enum KeyboardMetrics {
         if row == 3 && column == 5 {
             return isSymbolMode
                 ? rightSymbolKeyWidth + centerKeyWidth + keySpacing
-                : centerKeyWidth
+                : rightSymbolKeyWidth
+        }
+
+        if row == 3 && column == 6 {
+            return centerKeyWidth
         }
 
         if column == 0 || column == 6 {
@@ -106,12 +110,12 @@ enum KeyboardMetrics {
 
     // Korean mode layout: seven columns on every row.
     // Left column: special symbols, Center: consonants, Right column: symbols
-    // Row 3: consonant-width backspace followed by the edge-width vowel key.
+    // Row 3: edge-width vowel key followed by consonant-width backspace.
     static let koreanLayout: [[KeyContent]] = [
         [.symbol("~"), .consonant(.ㅃ), .consonant(.ㅉ), .consonant(.ㄸ), .consonant(.ㄲ), .consonant(.ㅆ), .symbol("!")],
         [.symbol("^"), .consonant(.ㅂ), .consonant(.ㅈ), .consonant(.ㄷ), .consonant(.ㄱ), .consonant(.ㅅ), .symbol("?")],
         [.symbol(";"), .consonant(.ㅁ), .consonant(.ㄴ), .consonant(.ㅇ), .consonant(.ㄹ), .consonant(.ㅎ), .symbol(".")],
-        [.symbol("*"), .consonant(.ㅋ), .consonant(.ㅌ), .consonant(.ㅊ), .consonant(.ㅍ), .backspace, .vowelGesture],
+        [.symbol("*"), .consonant(.ㅋ), .consonant(.ㅌ), .consonant(.ㅊ), .consonant(.ㅍ), .vowelGesture, .backspace],
     ]
 
     // Symbol mode layout.

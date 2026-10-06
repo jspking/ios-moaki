@@ -38,8 +38,8 @@ final class KeyboardMetricsLayoutTests: XCTestCase {
         let totalWidth: CGFloat = 375
         let centerWidth = KeyboardMetrics.centerKeyWidth(for: totalWidth)
         let leftWidth = KeyboardMetrics.keyWidth(for: 0, row: 3, centerKeyWidth: centerWidth)
-        let backspaceWidth = KeyboardMetrics.keyWidth(for: 5, row: 3, centerKeyWidth: centerWidth)
-        let vowelWidth = KeyboardMetrics.keyWidth(for: 6, row: 3, centerKeyWidth: centerWidth)
+        let backspaceWidth = KeyboardMetrics.keyWidth(for: 6, row: 3, centerKeyWidth: centerWidth)
+        let vowelWidth = KeyboardMetrics.keyWidth(for: 5, row: 3, centerKeyWidth: centerWidth)
         let rowWidth = leftWidth
             + centerWidth * 4
             + backspaceWidth
@@ -48,8 +48,8 @@ final class KeyboardMetricsLayoutTests: XCTestCase {
 
         XCTAssertEqual(backspaceWidth, centerWidth)
         XCTAssertEqual(vowelWidth, KeyboardMetrics.rightSymbolKeyWidth)
-        XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 5, isSymbolMode: false), .backspace)
-        XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 6, isSymbolMode: false), .vowelGesture)
+        XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 6, isSymbolMode: false), .backspace)
+        XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 5, isSymbolMode: false), .vowelGesture)
 
         XCTAssertEqual(
             rowWidth,

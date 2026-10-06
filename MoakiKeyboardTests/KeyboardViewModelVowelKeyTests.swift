@@ -40,10 +40,10 @@ final class KeyboardViewModelVowelKeyTests: XCTestCase {
         swipe(model, to: CGPoint(x: 80, y: 0))
         XCTAssertEqual(delegate.insertedTexts, ["ㅏ"])
 
-        model.gestureStarted(row: 3, column: 6, at: .zero)
+        model.gestureStarted(row: 3, column: 5, at: .zero)
         model.gestureMoved(to: CGPoint(x: 90, y: 0))
         XCTAssertEqual(model.previewVowel, .ㅡ)
-        model.gestureEnded(row: 3, column: 6)
+        model.gestureEnded(row: 3, column: 5)
         XCTAssertEqual(delegate.insertedTexts, ["ㅏ", "ㅡ"])
 
         swipe(model, to: CGPoint(x: 0, y: -90))
@@ -61,9 +61,9 @@ final class KeyboardViewModelVowelKeyTests: XCTestCase {
     }
 
     private func swipe(_ model: KeyboardViewModel, to point: CGPoint) {
-        model.gestureStarted(row: 3, column: 6, at: .zero)
+        model.gestureStarted(row: 3, column: 5, at: .zero)
         model.gestureMoved(to: point)
-        model.gestureEnded(row: 3, column: 6)
+        model.gestureEnded(row: 3, column: 5)
     }
 }
 
