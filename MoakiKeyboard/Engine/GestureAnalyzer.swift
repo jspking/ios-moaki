@@ -100,7 +100,7 @@ class GestureAnalyzer {
         // If standard threshold fails, try lower reversal threshold for opposite directions
         if newDirection == nil, let lastDirection = directions.last, magnitude >= reversalThreshold {
             if let candidate = GestureDirection.from(vector: vector, threshold: reversalThreshold),
-               candidate.isOpposite(to: lastDirection) {
+               candidate.isReversal(of: lastDirection) {
                 newDirection = candidate
             }
         }
@@ -115,7 +115,7 @@ class GestureAnalyzer {
             // Only add if direction changed
             if newDirection != lastDirection {
                 // Make sure we've moved enough from the last direction change
-                if magnitude >= directionChangeThreshold || (newDirection.isOpposite(to: lastDirection) && magnitude >= reversalThreshold) {
+                if magnitude >= directionChangeThreshold || (newDirection.isReversal(of: lastDirection) && magnitude >= reversalThreshold) {
                     beginStroke(newDirection, magnitude: magnitude, from: referencePoint, to: currentPoint)
                 } else {
                     extendCurrentStroke(to: currentPoint)
@@ -123,6 +123,9 @@ class GestureAnalyzer {
             } else {
                 // Same direction continuing: this is where a long stroke grows.
                 extendCurrentStroke(to: currentPoint)
+                // Keep turns relative to the recent movement. Stroke length
+                // remains measured from its own start point above.
+                lastDirectionChangePoint = currentPoint
             }
         } else {
             // First direction

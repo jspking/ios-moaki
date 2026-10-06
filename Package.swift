@@ -45,6 +45,7 @@ let package = Package(
                 "CursorMovementResolverTests.swift",
                 "GestureAnalyzerTests.swift",
                 "VowelResolverTests.swift",
+                "VowelGesturePathTests.swift",
                 "GestureDirectionToleranceTests.swift",
                 "HangulComposerDeletionTests.swift",
                 "HangulComposerTests.swift",

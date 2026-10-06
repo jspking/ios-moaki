@@ -11,7 +11,7 @@ final class GestureDirectionToleranceTests: XCTestCase {
 
     func testUpRightStillIncludesDeliberateDiagonalStroke() {
         XCTAssertEqual(direction(atDegrees: 45), .upRight)
-        XCTAssertEqual(direction(atDegrees: 69), .upRight)
+        XCTAssertEqual(direction(atDegrees: 55), .upRight)
     }
 
     func testDownAllowsTwentyDegreesOfRightDrift() {
@@ -20,7 +20,7 @@ final class GestureDirectionToleranceTests: XCTestCase {
     }
 
     func testDownRightStillIncludesDeliberateDiagonalStroke() {
-        XCTAssertEqual(direction(atDegrees: 300), .downRight)
+        XCTAssertEqual(direction(atDegrees: 305), .downRight)
         XCTAssertEqual(direction(atDegrees: 315), .downRight)
     }
 

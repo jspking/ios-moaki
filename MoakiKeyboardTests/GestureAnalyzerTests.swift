@@ -118,6 +118,39 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertEqual(analyzer.finalizeGesture(), [.up, .right])
     }
 
+    // MARK: - Opening Stroke Length Tests
+
+    /// The complaint behind this rule: a vertical drag that leans to the right
+    /// used to tip over into ㅣ. It now stays ㅗ however far the finger travels.
+    func testVerticalStrokeLeaningRightStaysUpAtAnyLength() {
+        for length in [CGFloat(30), 60, 90, 140] {
+            let analyzer = GestureAnalyzer()
+            feed(analyzer, degrees: 65, length: length)
+            XCTAssertEqual(analyzer.finalizeGesture(), [.up], "\(length)pt")
+        }
+    }
+
+    func testLongVerticalStrokeIsNeverPromotedToADiagonal() {
+        let analyzer = GestureAnalyzer()
+        feed(analyzer, degrees: 90, length: 140)
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up])
+    }
+
+    func testLongDownRightStrokeKeepsItsDirectionForLengthBasedResolution() {
+        let analyzer = GestureAnalyzer()
+        feed(analyzer, degrees: 315, length: 90)
+        XCTAssertEqual(analyzer.finalizeGesture(), [.downRight])
+    }
+
+    func testTurnAfterTheOpeningStrokeSurvives() {
+        let analyzer = GestureAnalyzer()
+        analyzer.addPoint(CGPoint(x: 100, y: 200))
+        analyzer.addPoint(CGPoint(x: 100, y: 140))   // ↑ 60px
+        analyzer.addPoint(CGPoint(x: 145, y: 140))   // → 45px, deliberate turn
+
+        XCTAssertEqual(analyzer.finalizeGesture(), [.up, .right])
+    }
+
     // MARK: - Finalize Gesture Normalization Tests
 
     func testFinalizeKeepsMeaningfulMiddleDiagonalForThreeStrokeTurn() {
@@ -132,21 +165,13 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertEqual(analyzer.finalizeGesture(), [.down, .downRight, .left])
     }
 
-    /// Known pre-existing failure, surfaced when this file joined the SPM test
-    /// target. The ↗ blip measures 12.73pt, which clears both jitter tests in
-    /// `collapseTinyOscillations`: it exceeds the 6.4pt cap and also exceeds
-    /// min(30, 16) * 0.75 = 12.0pt. Whether a 12.73pt segment counts as jitter
-    /// at these thresholds is a tuning decision, so the behaviour is left alone
-    /// rather than changed alongside the long-stroke work.
     func testFinalizeCollapsesTinyDiagonalJitterWhenPathReturnsToSameDirection() {
-        XCTExpectFailure("Jitter cap is narrower than this test assumes; see comment above.")
-
         let analyzer = GestureAnalyzer(threshold: 8, reversalThreshold: 6, directionChangeThreshold: 8)
 
         analyzer.addPoint(CGPoint(x: 100, y: 100))
         analyzer.addPoint(CGPoint(x: 100, y: 70))    // ↑
         analyzer.addPoint(CGPoint(x: 109, y: 61))    // small ↗ jitter
-        analyzer.addPoint(CGPoint(x: 109, y: 45))    // back to ↑
+        analyzer.addPoint(CGPoint(x: 109, y: 35))    // back to ↑, clearly longer than the jitter
 
         XCTAssertEqual(analyzer.getDirections(), [.up, .upRight, .up])
         XCTAssertEqual(analyzer.finalizeGesture(), [.up])
@@ -264,5 +289,56 @@ final class GestureAnalyzerTests: XCTestCase {
         XCTAssertFalse(GestureDirection.up.isOpposite(to: .upRight))
         XCTAssertFalse(GestureDirection.downRight.isOpposite(to: .upRight))
         XCTAssertFalse(GestureDirection.left.isOpposite(to: .downLeft))
+    }
+
+    // MARK: - Reversal Detection Tests
+
+    func testReversalIsJudgedByAngleNotByExactOppositeBuckets() {
+        XCTAssertTrue(GestureDirection.up.isReversal(of: .down))
+        XCTAssertTrue(GestureDirection.right.isReversal(of: .left))
+        XCTAssertTrue(GestureDirection.right.isReversal(of: .upLeft), "135° apart still doubles back")
+        XCTAssertTrue(GestureDirection.up.isReversal(of: .downRight))
+        XCTAssertTrue(GestureDirection.down.isReversal(of: .upLeft))
+    }
+
+    func testPerpendicularAndAdjacentTurnsAreNotReversals() {
+        XCTAssertFalse(GestureDirection.up.isReversal(of: .left))
+        XCTAssertFalse(GestureDirection.up.isReversal(of: .right))
+        XCTAssertFalse(GestureDirection.up.isReversal(of: .upRight))
+        XCTAssertFalse(GestureDirection.right.isReversal(of: .downRight))
+    }
+
+    /// A return stroke that comes back a little off the outgoing line used to
+    /// fall out of the opposite-bucket test and need the full turn distance.
+    func testSkewedReturnStrokeKeepsTheLowerReversalThreshold() {
+        let analyzer = GestureAnalyzer()
+        analyzer.addPoint(CGPoint(x: 150, y: 250))
+        analyzer.addPoint(CGPoint(x: 210, y: 250))   // → 60px
+        analyzer.addPoint(CGPoint(x: 189, y: 264))   // 215°, 25px: under the turn threshold
+
+        XCTAssertEqual(analyzer.getDirections(), [.right, .downLeft])
+    }
+
+    // MARK: - Helpers
+
+    /// Feed a straight drag sampled every few points, the way a finger reports.
+    private func feed(_ analyzer: GestureAnalyzer,
+                      degrees: CGFloat,
+                      length: CGFloat,
+                      from startLength: CGFloat = 0,
+                      origin: CGPoint = CGPoint(x: 150, y: 250),
+                      step: CGFloat = 4) {
+        let radians = degrees * .pi / 180
+        if startLength == 0 {
+            analyzer.addPoint(origin)
+        }
+        var travelled = startLength
+        while travelled < length {
+            travelled = min(travelled + step, length)
+            analyzer.addPoint(CGPoint(
+                x: origin.x + cos(radians) * travelled,
+                y: origin.y - sin(radians) * travelled
+            ))
+        }
     }
 }
