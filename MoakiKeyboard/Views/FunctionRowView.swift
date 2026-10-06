@@ -64,7 +64,7 @@ struct FunctionRowView: View {
     }
 
     private var returnWidth: CGFloat {
-        // Match backspace width: right symbol + center key + spacing.
+        // Span the backspace and vowel-key columns, including their gap.
         let centerKeyWidth = KeyboardMetrics.centerKeyWidth(for: totalWidth)
         return KeyboardMetrics.rightSymbolKeyWidth + centerKeyWidth + KeyboardMetrics.keySpacing
     }

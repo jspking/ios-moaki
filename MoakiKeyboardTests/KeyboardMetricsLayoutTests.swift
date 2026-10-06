@@ -10,6 +10,10 @@ final class KeyboardMetricsLayoutTests: XCTestCase {
             KeyboardMetrics.keyWidth(for: 6, row: 0, centerKeyWidth: centerWidth),
             44
         )
+        XCTAssertEqual(
+            KeyboardMetrics.keyWidth(for: 0, row: 0, centerKeyWidth: centerWidth),
+            44
+        )
         XCTAssertGreaterThan(centerWidth, 44)
     }
 
@@ -42,7 +46,8 @@ final class KeyboardMetricsLayoutTests: XCTestCase {
             + vowelWidth
             + KeyboardMetrics.keySpacing * 6
 
-        XCTAssertEqual(backspaceWidth, KeyboardMetrics.rightSymbolKeyWidth)
+        XCTAssertEqual(backspaceWidth, centerWidth)
+        XCTAssertEqual(vowelWidth, KeyboardMetrics.rightSymbolKeyWidth)
         XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 5, isSymbolMode: false), .backspace)
         XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 6, isSymbolMode: false), .vowelGesture)
 

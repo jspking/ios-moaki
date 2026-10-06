@@ -18,9 +18,7 @@ enum KeyboardMetrics {
     static let keySpacing: CGFloat = 4
     static let keyCornerRadius: CGFloat = 8
 
-    // Keep the less frequently used left symbols compact, while giving the
-    // screen-edge punctuation keys a full-size touch target.
-    static let leftSymbolWidthRatio: CGFloat = 0.35
+    // Both edges use the same width for symbols and the vowel gesture key.
     static let rightSymbolKeyWidth: CGFloat = 44
 
     // Width ratio for action keys (backspace/return) relative to total width
@@ -64,11 +62,11 @@ enum KeyboardMetrics {
     }
 
     // Calculate center key width based on available space
-    // Row 0-2: left symbol + center*5 + fixed-width right symbol.
+    // Two fixed-width edge keys and five equally sized center keys.
     static func centerKeyWidth(for totalWidth: CGFloat) -> CGFloat {
         let spacing = keySpacing * 8  // 8 gaps for 7 columns + edges
-        let availableWidth = totalWidth - spacing - rightSymbolKeyWidth
-        return availableWidth / (leftSymbolWidthRatio + 5)
+        let availableWidth = totalWidth - spacing - rightSymbolKeyWidth * 2
+        return availableWidth / 5
     }
 
     // Calculate key height based on available space
@@ -79,23 +77,13 @@ enum KeyboardMetrics {
 
     // Get key width for specific column and row
     static func keyWidth(for column: Int, row: Int, centerKeyWidth: CGFloat, isSymbolMode: Bool = false) -> CGFloat {
-        let leftSymbolWidth = centerKeyWidth * leftSymbolWidthRatio
-
         if row == 3 && column == 5 {
             return isSymbolMode
                 ? rightSymbolKeyWidth + centerKeyWidth + keySpacing
-                : rightSymbolKeyWidth
+                : centerKeyWidth
         }
 
-        if row == 3 && column == 6 {
-            return centerKeyWidth
-        }
-
-        if column == 0 {
-            return leftSymbolWidth
-        }
-
-        if column == 6 {
+        if column == 0 || column == 6 {
             return rightSymbolKeyWidth
         }
 
@@ -118,7 +106,7 @@ enum KeyboardMetrics {
 
     // Korean mode layout: seven columns on every row.
     // Left column: special symbols, Center: consonants, Right column: symbols
-    // Row 3: compact backspace followed by the vowel gesture key.
+    // Row 3: consonant-width backspace followed by the edge-width vowel key.
     static let koreanLayout: [[KeyContent]] = [
         [.symbol("~"), .consonant(.ㅃ), .consonant(.ㅉ), .consonant(.ㄸ), .consonant(.ㄲ), .consonant(.ㅆ), .symbol("!")],
         [.symbol("^"), .consonant(.ㅂ), .consonant(.ㅈ), .consonant(.ㄷ), .consonant(.ㄱ), .consonant(.ㅅ), .symbol("?")],
