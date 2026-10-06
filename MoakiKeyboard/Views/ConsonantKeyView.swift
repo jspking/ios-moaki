@@ -28,6 +28,15 @@ struct KeyView: View {
             keyLabel
         }
         .frame(width: keySize.width, height: keySize.height)
+        .overlay(alignment: .topTrailing) {
+            if let number = longPressNumber {
+                Text(number)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .padding(.top, 3)
+                    .padding(.trailing, 5)
+            }
+        }
         .overlay(numberPopupOverlay, alignment: .top)
         .gesture(
             DragGesture(minimumDistance: 0)
