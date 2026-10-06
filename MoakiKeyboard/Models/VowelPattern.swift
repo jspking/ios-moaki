@@ -9,14 +9,14 @@ struct VowelPattern {
         self.directions = directions
     }
 
+    /// Length-agnostic patterns. Every diagonal is normalized onto a vertical
+    /// axis before matching (↖↗→↑, ↙↘→↓), so no pattern here uses one.
     static let allPatterns: [VowelPattern] = [
-        // Basic vowels (왼쪽 대각선만 정규화: ↖→↑, ↙→↓)
-        VowelPattern(.ㅗ, .up),                           // ↑ (↖도 정규화로 처리됨)
-        VowelPattern(.ㅜ, .down),                         // ↓ (↙도 정규화로 처리됨)
+        // Basic vowels
+        VowelPattern(.ㅗ, .up),                           // ↑ (↖ ↗도 정규화로 처리됨)
+        VowelPattern(.ㅜ, .down),                         // ↓ (↙ ↘도 정규화로 처리됨)
         VowelPattern(.ㅏ, .right),                        // →
         VowelPattern(.ㅓ, .left),                         // ←
-        VowelPattern(.ㅡ, .downRight),                    // ↘ → ㅡ
-        VowelPattern(.ㅣ, .upRight),                      // ↗ → ㅣ
 
         // Y-vowels (triple direction)
         VowelPattern(.ㅛ, .up, .down, .up),               // ↑↓↑
@@ -37,20 +37,42 @@ struct VowelPattern {
         VowelPattern(.ㅒ, .right, .left, .right, .left),  // →←→←
         VowelPattern(.ㅔ, .left, .right),                 // ←→
         VowelPattern(.ㅖ, .left, .right, .left, .right),  // ←→←→
+    ]
 
-        // Eu-i (ㅡ + ㅣ)
-        VowelPattern(.ㅢ, .downRight, .upLeft),           // ↘↖ (오른쪽아래-왼쪽위)
-        VowelPattern(.ㅢ, .downRight, .up),               // ↘↑ (오른쪽아래-위)
+    /// Patterns that need a deliberately long first stroke. They are matched
+    /// before `allPatterns` and only when the whole gesture is consumed, so a
+    /// long stroke that continues into some other shape (long →← for ㅐ, long
+    /// ↑→ for ㅘ) falls back to the length-agnostic table instead of being
+    /// forced into ㅡ or ㅣ.
+    ///
+    /// A long stroke means the same vowel whichever way it is drawn: ㅡ along
+    /// either horizontal direction, ㅣ along either vertical one. ㅢ follows the
+    /// same rule on both of its strokes, so all four turns produce it.
+    static let longFirstStrokePatterns: [VowelPattern] = [
+        VowelPattern(.ㅡ, .right),                        // 긴 →
+        VowelPattern(.ㅡ, .left),                         // 긴 ←
+        VowelPattern(.ㅣ, .up),                           // 긴 ↑
+        VowelPattern(.ㅣ, .down),                         // 긴 ↓
+
+        // ㅢ = ㅡ + ㅣ: a long horizontal stroke, then a vertical turn.
+        VowelPattern(.ㅢ, .right, .up),                   // 긴 → 다음 ↑
+        VowelPattern(.ㅢ, .right, .down),                 // 긴 → 다음 ↓
+        VowelPattern(.ㅢ, .left, .up),                    // 긴 ← 다음 ↑
+        VowelPattern(.ㅢ, .left, .down),                  // 긴 ← 다음 ↓
     ]
 
     // Build a trie for efficient pattern matching
-    static let patternTrie: PatternTrie = {
+    static let patternTrie: PatternTrie = trie(for: allPatterns)
+
+    static let longFirstStrokeTrie: PatternTrie = trie(for: longFirstStrokePatterns)
+
+    private static func trie(for patterns: [VowelPattern]) -> PatternTrie {
         let trie = PatternTrie()
-        for pattern in allPatterns {
+        for pattern in patterns {
             trie.insert(pattern)
         }
         return trie
-    }()
+    }
 }
 
 // Trie for efficient pattern matching

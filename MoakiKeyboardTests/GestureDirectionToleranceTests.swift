@@ -27,8 +27,15 @@ final class GestureDirectionToleranceTests: XCTestCase {
     func testAdjustedDirectionsResolveToExpectedBasicVowels() {
         XCTAssertEqual(vowel(atDegrees: 75), .ㅗ)
         XCTAssertEqual(vowel(atDegrees: 285), .ㅜ)
-        XCTAssertEqual(vowel(atDegrees: 45), .ㅣ)
-        XCTAssertEqual(vowel(atDegrees: 315), .ㅡ)
+    }
+
+    /// ㅡ and ㅣ moved to long strokes, so a short diagonal no longer selects a
+    /// vowel of its own; every diagonal folds onto the vertical axis.
+    func testShortDiagonalsFoldOntoVerticalVowels() {
+        XCTAssertEqual(vowel(atDegrees: 45), .ㅗ)
+        XCTAssertEqual(vowel(atDegrees: 135), .ㅗ)
+        XCTAssertEqual(vowel(atDegrees: 225), .ㅜ)
+        XCTAssertEqual(vowel(atDegrees: 315), .ㅜ)
     }
 
     private func direction(atDegrees degrees: CGFloat) -> GestureDirection? {

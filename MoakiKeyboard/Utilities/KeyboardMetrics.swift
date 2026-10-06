@@ -27,7 +27,6 @@ enum KeyboardMetrics {
 
     // Function row
     static let functionRowHeight: CGFloat = 44
-    static let functionKeyMinimumWidth: CGFloat = 44
 
     // Gesture thresholds
     static let gestureThreshold: CGFloat = 20        // Minimum distance to register direction
@@ -37,6 +36,10 @@ enum KeyboardMetrics {
     // promoting ㅗ (↑) to ㅘ (↑→).
     static let directionChangeThreshold: CGFloat = 30
     static let gestureTimeout: TimeInterval = 0.5    // Max time between direction changes
+
+    // The gesture length setting exposes only the base value and rescales the
+    // other two thresholds. The ratios and user-facing limits live in
+    // SharedKeyboardPreferences, which both targets compile.
 
     // Space cursor gesture tuning values
     static let spaceDragThreshold: CGFloat = 8

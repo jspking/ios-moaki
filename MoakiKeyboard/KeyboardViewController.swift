@@ -27,14 +27,24 @@ class KeyboardViewController: UIInputViewController {
         self.heightConstraint = heightConstraint
 
         viewModel.delegate = self
-        viewModel.applyDeletionUnit(sharedPreferences.deletionUnit)
+        applySharedPreferences()
         setupKeyboardView()
         setupHapticFeedback()
     }
 
+    /// Pull every setting the containing app owns. Called on load and on each
+    /// appearance, since the extension keeps running while the app changes them.
+    private func applySharedPreferences() {
+        viewModel.applyDeletionUnit(sharedPreferences.deletionUnit)
+        viewModel.applyGestureLengths(
+            baseLength: sharedPreferences.baseGestureLength,
+            longStrokeLength: sharedPreferences.longStrokeLength
+        )
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        viewModel.applyDeletionUnit(sharedPreferences.deletionUnit)
+        applySharedPreferences()
         heightConstraint?.constant = 260
         heightConstraint?.isActive = true
         view.setNeedsLayout()
@@ -64,19 +74,12 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        viewModel.resetGestureState()
+        viewModel.prepareForDismissal()
     }
 
     private func setupKeyboardView() {
-        let rootView = KeyboardView(
-            viewModel: viewModel,
-            onInputModeList: { [weak self] sourceView, event in
-                guard let self else { return }
-                self.viewModel.prepareForKeyboardSwitch()
-                self.handleInputModeList(from: sourceView, with: event)
-            }
-        )
-        .ignoresSafeArea(.all)
+        let rootView = KeyboardView(viewModel: viewModel)
+            .ignoresSafeArea(.all)
         let hostingController = UIHostingController(rootView: rootView)
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
@@ -154,10 +157,6 @@ extension KeyboardViewController: KeyboardViewModelDelegate {
 
     func moveCursor(byCharacterOffset offset: Int) {
         textDocumentProxy.adjustTextPosition(byCharacterOffset: offset)
-    }
-
-    func switchToNextKeyboard() {
-        advanceToNextInputMode()
     }
 
     func triggerHapticFeedback() {

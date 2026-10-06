@@ -20,6 +20,9 @@ final class KeyboardViewModel: ObservableObject {
     private(set) var deletionUnit: DeletionUnit
     private var activeBackspaceDeletionUnit: DeletionUnit?
 
+    private(set) var gestureBaseLength: CGFloat = SharedKeyboardPreferences.defaultBaseGestureLength
+    private(set) var gestureLongStrokeLength: CGFloat = SharedKeyboardPreferences.defaultLongStrokeLength
+
     private let backspaceRepeatInitialDelay: TimeInterval
     private let backspaceRepeatInterval: TimeInterval
     private var isBackspacePressing = false
@@ -100,6 +103,20 @@ final class KeyboardViewModel: ObservableObject {
         self.deletionUnit = deletionUnit
     }
 
+    /// Apply the user's gesture length settings. `baseLength` rescales every
+    /// direction threshold; `longStrokeLength` is the distance at which a first
+    /// stroke means ㅡ/ㅣ instead of ㅏ/ㅗ.
+    func applyGestureLengths(baseLength: CGFloat, longStrokeLength: CGFloat) {
+        guard gestureBaseLength != baseLength || gestureLongStrokeLength != longStrokeLength else {
+            return
+        }
+        gestureBaseLength = baseLength
+        gestureLongStrokeLength = longStrokeLength
+        gestureAnalyzer.configure(baseLength: baseLength)
+        vowelResolver.configure(longStrokeLength: longStrokeLength)
+        resetGestureState()
+    }
+
     func inputSpace() {
         commitAndInsert(" ")
         triggerHapticFeedback()
@@ -110,14 +127,12 @@ final class KeyboardViewModel: ObservableObject {
         triggerHapticFeedback()
     }
 
-    func switchKeyboard() {
-        prepareForKeyboardSwitch()
-        delegate?.switchToNextKeyboard()
-    }
-
-    func prepareForKeyboardSwitch() {
-        stopBackspaceRepeat()
+    /// The document already contains the composing character. Release the
+    /// composer when iOS dismisses or switches the keyboard so it isn't
+    /// inserted a second time when the keyboard returns.
+    func prepareForDismissal() {
         commitCurrent()
+        resetGestureState()
     }
 
     func beginBackspacePress() {
@@ -182,9 +197,9 @@ final class KeyboardViewModel: ObservableObject {
 
     func gestureMoved(to point: CGPoint) {
         gestureAnalyzer.addPoint(point)
-        let directions = gestureAnalyzer.getDirections()
-        gestureDirections = directions
-        previewVowel = vowelResolver.peekVowel(directions: directions)
+        let strokes = gestureAnalyzer.getStrokes()
+        gestureDirections = strokes.map { $0.direction }
+        previewVowel = vowelResolver.peekVowel(strokes: strokes)
     }
 
     func gestureEnded(row: Int, column: Int) {
@@ -220,7 +235,7 @@ final class KeyboardViewModel: ObservableObject {
     }
 
     private func handleKoreanModeGesture(row: Int, column: Int) {
-        let directions = gestureAnalyzer.finalizeGesture()
+        let strokes = gestureAnalyzer.finalizeStrokes()
         guard let content = KeyboardMetrics.keyContent(
             at: row,
             column: column,
@@ -229,11 +244,11 @@ final class KeyboardViewModel: ObservableObject {
 
         switch content {
         case .consonant(let consonant):
-            if directions.isEmpty {
+            if strokes.isEmpty {
                 inputConsonant(consonant)
             } else {
                 inputConsonant(consonant)
-                let resolution = vowelResolver.resolve(directions: directions)
+                let resolution = vowelResolver.resolve(strokes: strokes)
                 if let vowel = resolution.vowel {
                     inputVowel(vowel)
                 }
@@ -431,7 +446,6 @@ protocol KeyboardViewModelDelegate: AnyObject {
     func deleteBackward()
     func updateComposingText(from previous: String, to current: String)
     func moveCursor(byCharacterOffset offset: Int)
-    func switchToNextKeyboard()
     func triggerHapticFeedback()
 }
 

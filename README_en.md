@@ -18,18 +18,18 @@
 
 ## Gesture Guide
 
-Drag on a consonant key to input a vowel. Left diagonals (↖, ↙) are normalized to vertical directions.
+Drag on a consonant key to input a vowel. Every diagonal is normalized to a vertical direction (↖ ↗ → ↑, ↙ ↘ → ↓), so tilt never decides which vowel you get. ㅡ and ㅣ are entered by dragging the same direction **much farther**. A long stroke means the same vowel whichever way it is drawn: ㅡ along either horizontal direction, ㅣ along either vertical one. The base distance is 20pt and the long-stroke distance is 70pt; both are adjustable in the app's keyboard settings.
 
 ### Basic Vowels
 
 | Direction | Vowel |
 |-----------|-------|
-| → | ㅏ (a) |
-| ← | ㅓ (eo) |
-| ↑ (or ↖) | ㅗ (o) |
-| ↓ (or ↙) | ㅜ (u) |
-| ↘ | ㅡ (eu) |
-| ↗ | ㅣ (i) |
+| short → | ㅏ (a) |
+| short ← | ㅓ (eo) |
+| short ↑ (or ↖ ↗) | ㅗ (o) |
+| short ↓ (or ↙ ↘) | ㅜ (u) |
+| **long → or ←** | ㅡ (eu) |
+| **long ↑ or ↓** | ㅣ (i) |
 
 ### Y-Vowels (Back-and-forth gestures)
 
@@ -54,7 +54,7 @@ Drag on a consonant key to input a vowel. Left diagonals (↖, ↙) are normaliz
 | →←→← | ㅒ (yae) |
 | ←→ | ㅔ (e) |
 | ←→←→ | ㅖ (ye) |
-| ↘↖ or ↘↑ | ㅢ (ui) |
+| **long horizontal** then vertical | ㅢ (ui) |
 
 ## Keyboard Layout
 

@@ -258,6 +258,5 @@ private final class DeletionBufferDelegate: KeyboardViewModelDelegate {
         text.append(current)
     }
 
-    func switchToNextKeyboard() {}
     func triggerHapticFeedback() {}
 }

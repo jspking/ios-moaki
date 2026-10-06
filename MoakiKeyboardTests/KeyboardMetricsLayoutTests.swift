@@ -46,4 +46,24 @@ final class KeyboardMetricsLayoutTests: XCTestCase {
             accuracy: 0.001
         )
     }
+
+    // MARK: - Gesture Length Consistency
+
+    /// The gesture length setting rescales the direction thresholds from the
+    /// base value. These ratios live in SharedKeyboardPreferences because the
+    /// app target does not compile KeyboardMetrics, so pin them here.
+    func testGestureThresholdRatiosMatchKeyboardMetrics() {
+        XCTAssertEqual(
+            SharedKeyboardPreferences.defaultBaseGestureLength,
+            KeyboardMetrics.gestureThreshold
+        )
+        XCTAssertEqual(
+            KeyboardMetrics.gestureThreshold * SharedKeyboardPreferences.reversalThresholdRatio,
+            KeyboardMetrics.reversalThreshold
+        )
+        XCTAssertEqual(
+            KeyboardMetrics.gestureThreshold * SharedKeyboardPreferences.directionChangeThresholdRatio,
+            KeyboardMetrics.directionChangeThreshold
+        )
+    }
 }
