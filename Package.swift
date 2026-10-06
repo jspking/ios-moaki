@@ -41,21 +41,21 @@ let package = Package(
             name: "MoakiKeyboardCoreTests",
             dependencies: ["MoakiKeyboardCore"],
             path: "MoakiKeyboardTests",
-            exclude: [
-                "GestureAnalyzerTests.swift",
-                "VowelResolverTests.swift"
-            ],
             sources: [
                 "CursorMovementResolverTests.swift",
+                "GestureAnalyzerTests.swift",
                 "GestureDirectionToleranceTests.swift",
                 "HangulComposerDeletionTests.swift",
                 "HangulComposerTests.swift",
                 "KeyboardMetricsLayoutTests.swift",
                 "KeyboardViewModelCursorTests.swift",
                 "KeyboardViewModelDeletionTests.swift",
+                "KeyboardViewModelDismissalTests.swift",
                 "KeyboardViewModelLongPressTests.swift",
                 "SharedKeyboardPreferencesTests.swift",
-                "SpaceCursorGestureTrackerTests.swift"
+                "SpaceCursorGestureTrackerTests.swift",
+                "VowelGesturePathTests.swift",
+                "VowelResolverTests.swift"
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v5)

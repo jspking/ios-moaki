@@ -39,7 +39,8 @@ struct VowelPattern {
         VowelPattern(.ㅖ, .left, .right, .left, .right),  // ←→←→
 
         // Eu-i (ㅡ + ㅣ)
-        VowelPattern(.ㅢ, .downRight, .upLeft),           // ↘↖ (오른쪽아래-왼쪽위)
+        // ↘↖ needs no entry of its own: VowelResolver turns a trailing ↖ that
+        // follows ↘ into ↑, so it arrives here as ↘↑.
         VowelPattern(.ㅢ, .downRight, .up),               // ↘↑ (오른쪽아래-위)
     ]
 

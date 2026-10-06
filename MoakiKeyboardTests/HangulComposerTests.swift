@@ -5,6 +5,11 @@ import XCTest
 #else
 @testable import MoakiKeyboard
 #endif
+#if SWIFT_PACKAGE
+@testable import MoakiKeyboardCore
+#else
+@testable import MoakiKeyboard
+#endif
 
 final class HangulComposerTests: XCTestCase {
 
@@ -158,14 +163,14 @@ final class HangulComposerTests: XCTestCase {
 
     func testHelloWorld() {
         // 안녕하세요
+        // 안녕 needs ㄴ twice: ㅇㅏㄴ closes 안, then ㄴㅕㅇ opens 녕.
         _ = composer.inputChoseong(.ㅇ)
         _ = composer.inputJungseong(.ㅏ)
         _ = composer.inputChoseong(.ㄴ)
-        composer.commitCurrent()
-
         _ = composer.inputChoseong(.ㄴ)
         _ = composer.inputJungseong(.ㅕ)
         _ = composer.inputChoseong(.ㅇ)
+
         composer.commitCurrent()
 
         _ = composer.inputChoseong(.ㅎ)
@@ -186,28 +191,35 @@ final class HangulComposerTests: XCTestCase {
         XCTAssertEqual(composer.composedText, "안녕하세요")
     }
 
+    /// Typed without an explicit commit between syllables, so this also covers
+    /// the composer closing a syllable when the next choseong arrives.
     func testThankYou() {
-        // 감사합니다
+        // 감사합니다 = ㄱㅏㅁ / ㅅㅏ / ㅎㅏㅂ / ㄴㅣ / ㄷㅏ
         _ = composer.inputChoseong(.ㄱ)
         _ = composer.inputJungseong(.ㅏ)
         _ = composer.inputChoseong(.ㅁ)
-        composer.commitCurrent()
+
+        XCTAssertEqual(composer.currentComposingCharacter, "감")
 
         _ = composer.inputChoseong(.ㅅ)
         _ = composer.inputJungseong(.ㅏ)
-        composer.commitCurrent()
+
+        XCTAssertEqual(composer.composedText, "감")
 
         _ = composer.inputChoseong(.ㅎ)
         _ = composer.inputJungseong(.ㅏ)
         _ = composer.inputChoseong(.ㅂ)
-        composer.commitCurrent()
+
+        XCTAssertEqual(composer.composedText, "감사")
 
         _ = composer.inputChoseong(.ㄴ)
         _ = composer.inputJungseong(.ㅣ)
-        composer.commitCurrent()
+
+        XCTAssertEqual(composer.composedText, "감사합")
 
         _ = composer.inputChoseong(.ㄷ)
         _ = composer.inputJungseong(.ㅏ)
+
         composer.commitCurrent()
 
         XCTAssertEqual(composer.composedText, "감사합니다")

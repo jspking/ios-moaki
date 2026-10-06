@@ -11,17 +11,26 @@ class GestureAnalyzer {
     private var directions: [GestureDirection] = []
     private var directionMagnitudes: [CGFloat] = []
     private var lastDirectionChangePoint: CGPoint?
+    /// Angle-only reading of the opening stroke, kept so the stroke can be
+    /// re-judged as it lengthens without mistaking a turn for growth.
+    private var openingStrokeBearing: GestureDirection?
+    /// Longest the opening stroke has been so far, so a finger coming back
+    /// towards the start is never mistaken for the stroke still growing.
+    private var openingStrokeLength: CGFloat = 0
 
     private let threshold: CGFloat
     private let reversalThreshold: CGFloat
     private let directionChangeThreshold: CGFloat
+    private let diagonalThreshold: CGFloat
 
     init(threshold: CGFloat = KeyboardMetrics.gestureThreshold,
          reversalThreshold: CGFloat = KeyboardMetrics.reversalThreshold,
-         directionChangeThreshold: CGFloat = KeyboardMetrics.directionChangeThreshold) {
+         directionChangeThreshold: CGFloat = KeyboardMetrics.directionChangeThreshold,
+         diagonalThreshold: CGFloat = KeyboardMetrics.diagonalThreshold) {
         self.threshold = threshold
         self.reversalThreshold = reversalThreshold
         self.directionChangeThreshold = directionChangeThreshold
+        self.diagonalThreshold = diagonalThreshold
     }
 
     func reset() {
@@ -29,6 +38,8 @@ class GestureAnalyzer {
         directions.removeAll()
         directionMagnitudes.removeAll()
         lastDirectionChangePoint = nil
+        openingStrokeBearing = nil
+        openingStrokeLength = 0
     }
 
     func addPoint(_ point: CGPoint) {
@@ -47,46 +58,110 @@ class GestureAnalyzer {
     private func analyzeLatestMovement() {
         guard touchPoints.count >= 2 else { return }
 
-        let referencePoint = lastDirectionChangePoint ?? touchPoints.first!
         let currentPoint = touchPoints.last!
 
+        guard let lastDirection = directions.last else {
+            recordOpeningStroke(endingAt: currentPoint)
+            return
+        }
+
+        let isOpeningStrokeGrowing = reviseOpeningStroke(endingAt: currentPoint)
+
+        let referencePoint = lastDirectionChangePoint ?? touchPoints.first!
         let vector = CGVector(
             dx: currentPoint.x - referencePoint.x,
             dy: currentPoint.y - referencePoint.y
         )
-
-        let magnitude = sqrt(vector.dx * vector.dx + vector.dy * vector.dy)
+        let magnitude = GestureDirection.magnitude(of: vector)
 
         // Try detecting direction with standard threshold first
         var newDirection = GestureDirection.from(vector: vector, threshold: threshold)
 
         // If standard threshold fails, try lower reversal threshold for opposite directions
-        if newDirection == nil, let lastDirection = directions.last, magnitude >= reversalThreshold {
+        if newDirection == nil, magnitude >= reversalThreshold {
             if let candidate = GestureDirection.from(vector: vector, threshold: reversalThreshold),
-               candidate.isOpposite(to: lastDirection) {
+               candidate.isReversal(of: lastDirection) {
                 newDirection = candidate
             }
         }
 
         guard let newDirection else { return }
 
-        // Check if this is a new direction or continuation
-        if let lastDirection = directions.last {
-            // Only add if direction changed
-            if newDirection != lastDirection {
-                // Make sure we've moved enough from the last direction change
-                if magnitude >= directionChangeThreshold || (newDirection.isOpposite(to: lastDirection) && magnitude >= reversalThreshold) {
-                    directions.append(newDirection)
-                    directionMagnitudes.append(magnitude)
-                    lastDirectionChangePoint = currentPoint
-                }
-            }
-        } else {
-            // First direction
-            directions.append(newDirection)
-            directionMagnitudes.append(magnitude)
+        // Nothing has turned yet, so keep the turn reference near the finger.
+        // Left behind at the point where the opening stroke was first
+        // recognised, a later turn gets measured across the whole remaining
+        // stroke and reads as a diagonal rather than the turn it is.
+        //
+        // The recent movement has to agree with the opening bearing as well.
+        // The middle stroke of ㅙ(↑→←) and ㅞ(↓←→) arrives while the path from
+        // the origin still points the way it started, and it must not be
+        // mistaken for the opening stroke simply carrying on.
+        if isOpeningStrokeGrowing && newDirection == openingStrokeBearing {
             lastDirectionChangePoint = currentPoint
+            return
         }
+
+        // Only add if direction changed
+        if newDirection != lastDirection {
+            // Make sure we've moved enough from the last direction change
+            if magnitude >= directionChangeThreshold || (newDirection.isReversal(of: lastDirection) && magnitude >= reversalThreshold) {
+                directions.append(newDirection)
+                directionMagnitudes.append(magnitude)
+                lastDirectionChangePoint = currentPoint
+            }
+        }
+    }
+
+    /// The opening stroke is judged by angle and length together, so a drag that
+    /// sits in a diagonal wedge starts out as the nearest basic vowel and only
+    /// becomes ㅣ/ㅡ once it is long enough.
+    private func recordOpeningStroke(endingAt currentPoint: CGPoint) {
+        let vector = strokeVector(endingAt: currentPoint)
+        guard let direction = GestureDirection.from(vector: vector,
+                                                    threshold: threshold,
+                                                    diagonalThreshold: diagonalThreshold) else {
+            return
+        }
+
+        directions.append(direction)
+        directionMagnitudes.append(GestureDirection.magnitude(of: vector))
+        openingStrokeBearing = GestureDirection.from(vector: vector, threshold: threshold)
+        openingStrokeLength = GestureDirection.magnitude(of: vector)
+        lastDirectionChangePoint = currentPoint
+    }
+
+    /// While the opening stroke is the only one recorded it stays revisable,
+    /// because the finger may still cross `diagonalThreshold` and turn ㅗ into ㅣ.
+    /// Measuring from the touch origin every sample keeps the verdict current
+    /// right up to the moment the finger lifts.
+    ///
+    /// The stroke only counts as still growing while it points the same way it
+    /// started and keeps getting longer. A turn such as ㅘ(↑→) swings the angle
+    /// away from that bearing, and a reversal such as ㅚ(↑↓) shortens the stroke,
+    /// so both fall through to the direction-change logic.
+    private func reviseOpeningStroke(endingAt currentPoint: CGPoint) -> Bool {
+        guard directions.count == 1, let bearing = openingStrokeBearing else { return false }
+
+        let vector = strokeVector(endingAt: currentPoint)
+        let length = GestureDirection.magnitude(of: vector)
+
+        guard length > openingStrokeLength,
+              GestureDirection.from(vector: vector, threshold: threshold) == bearing,
+              let revised = GestureDirection.from(vector: vector,
+                                                  threshold: threshold,
+                                                  diagonalThreshold: diagonalThreshold) else {
+            return false
+        }
+
+        directions[0] = revised
+        directionMagnitudes[0] = length
+        openingStrokeLength = length
+        return true
+    }
+
+    private func strokeVector(endingAt currentPoint: CGPoint) -> CGVector {
+        let startPoint = touchPoints.first ?? currentPoint
+        return CGVector(dx: currentPoint.x - startPoint.x, dy: currentPoint.y - startPoint.y)
     }
 
     func finalizeGesture() -> [GestureDirection] {

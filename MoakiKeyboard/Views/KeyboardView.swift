@@ -4,7 +4,6 @@ import UIKit
 struct KeyboardView: View {
     @ObservedObject var viewModel: KeyboardViewModel
     @ObservedObject var settings = KeyboardSettings.shared
-    let onInputModeList: (UIView, UIEvent) -> Void
 
     var body: some View {
         GeometryReader { geometry in
@@ -38,7 +37,6 @@ struct KeyboardView: View {
                         totalWidth: geometry.size.width,
                         isSymbolMode: viewModel.isSymbolMode,
                         onToggleModePressed: { viewModel.toggleMode() },
-                        onInputModeList: onInputModeList,
                         onCommaPressed: { viewModel.inputSymbol(",") },
                         onSpacePressed: { viewModel.inputSpace() },
                         onCursorModeBegan: { viewModel.beginCursorMovement() },
@@ -65,8 +63,7 @@ struct KeyboardView: View {
 
 #Preview {
     KeyboardView(
-        viewModel: KeyboardViewModel(),
-        onInputModeList: { _, _ in }
+        viewModel: KeyboardViewModel()
     )
         .frame(height: 280)
 }

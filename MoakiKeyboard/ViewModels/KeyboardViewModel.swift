@@ -110,13 +110,15 @@ final class KeyboardViewModel: ObservableObject {
         triggerHapticFeedback()
     }
 
-    func switchKeyboard() {
-        prepareForKeyboardSwitch()
-        delegate?.switchToNextKeyboard()
-    }
-
-    func prepareForKeyboardSwitch() {
-        stopBackspaceRepeat()
+    /// The keyboard is going away: the system globe key, the text field losing
+    /// focus, or the host app being left.
+    ///
+    /// The syllable being composed is already real text in the document, since
+    /// extensions cannot use marked text. Only the composer's record of it is
+    /// dropped here, so the next appearance does not try to delete characters
+    /// that the cursor has since moved away from.
+    func prepareForDismissal() {
+        resetGestureState()
         commitCurrent()
     }
 
@@ -431,7 +433,6 @@ protocol KeyboardViewModelDelegate: AnyObject {
     func deleteBackward()
     func updateComposingText(from previous: String, to current: String)
     func moveCursor(byCharacterOffset offset: Int)
-    func switchToNextKeyboard()
     func triggerHapticFeedback()
 }
 
