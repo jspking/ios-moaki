@@ -3,18 +3,18 @@ import XCTest
 @testable import MoakiKeyboardCore
 
 final class KeyboardMetricsLayoutTests: XCTestCase {
-    func testRightEdgeSymbolUsesFullSizeTouchTarget() {
+    func testEdgeKeysHaveEqualWidthsAndConsonantsAreWider() {
         let centerWidth = KeyboardMetrics.centerKeyWidth(for: 375)
 
         XCTAssertEqual(
             KeyboardMetrics.keyWidth(for: 6, row: 0, centerKeyWidth: centerWidth),
-            44
+            40
         )
         XCTAssertEqual(
             KeyboardMetrics.keyWidth(for: 0, row: 0, centerKeyWidth: centerWidth),
-            44
+            40
         )
-        XCTAssertGreaterThan(centerWidth, 44)
+        XCTAssertGreaterThan(centerWidth, 40)
     }
 
     func testSevenColumnRowsStillFitAvailableKeyboardWidth() {

@@ -19,7 +19,7 @@ enum KeyboardMetrics {
     static let keyCornerRadius: CGFloat = 8
 
     // Both edges use the same width for symbols and the vowel gesture key.
-    static let rightSymbolKeyWidth: CGFloat = 44
+    static let rightSymbolKeyWidth: CGFloat = 40
 
     // Width ratio for action keys (backspace/return) relative to total width
     static let actionKeyWidthRatio: CGFloat = 0.20
