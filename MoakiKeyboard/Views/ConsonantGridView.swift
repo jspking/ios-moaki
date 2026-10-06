@@ -29,7 +29,8 @@ struct KeyGridView: View {
                         let width = KeyboardMetrics.keyWidth(
                             for: column,
                             row: row,
-                            centerKeyWidth: centerKeyWidth
+                            centerKeyWidth: centerKeyWidth,
+                            isSymbolMode: isSymbolMode
                         )
 
                         KeyView(

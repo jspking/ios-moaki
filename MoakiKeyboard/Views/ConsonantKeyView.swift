@@ -108,6 +108,12 @@ struct KeyView: View {
             Image(systemName: "delete.left")
                 .font(.system(size: keySize.height * 0.35))
                 .foregroundColor(textColor)
+
+        case .vowelGesture:
+            Text(previewVowel.map { String($0.compatibilityCharacter) } ?? "모음")
+                .font(.system(size: previewVowel == nil ? 12 : keySize.height * 0.4, weight: .medium))
+                .foregroundColor(previewVowel == nil ? textColor : .blue)
+                .accessibilityLabel("모음 입력")
         }
     }
 
@@ -132,7 +138,7 @@ struct KeyView: View {
         switch content {
         case .backspace:
             return isPressed || isHighlighted ? Color(.systemGray3) : Color(.systemGray5)
-        case .symbol:
+        case .symbol, .vowelGesture:
             return isPressed || isHighlighted ? Color(.systemGray3) : Color(.systemGray5)
         case .consonant:
             return isPressed || isHighlighted ? Color(.systemGray4) : Color(.secondarySystemBackground)

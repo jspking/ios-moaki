@@ -35,15 +35,30 @@ final class KeyboardMetricsLayoutTests: XCTestCase {
         let centerWidth = KeyboardMetrics.centerKeyWidth(for: totalWidth)
         let leftWidth = KeyboardMetrics.keyWidth(for: 0, row: 3, centerKeyWidth: centerWidth)
         let backspaceWidth = KeyboardMetrics.keyWidth(for: 5, row: 3, centerKeyWidth: centerWidth)
+        let vowelWidth = KeyboardMetrics.keyWidth(for: 6, row: 3, centerKeyWidth: centerWidth)
         let rowWidth = leftWidth
             + centerWidth * 4
             + backspaceWidth
-            + KeyboardMetrics.keySpacing * 5
+            + vowelWidth
+            + KeyboardMetrics.keySpacing * 6
+
+        XCTAssertEqual(backspaceWidth, KeyboardMetrics.rightSymbolKeyWidth)
+        XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 5, isSymbolMode: false), .backspace)
+        XCTAssertEqual(KeyboardMetrics.keyContent(at: 3, column: 6, isSymbolMode: false), .vowelGesture)
 
         XCTAssertEqual(
             rowWidth,
             totalWidth - KeyboardMetrics.keySpacing * 2,
             accuracy: 0.001
+        )
+    }
+
+    func testSymbolModeKeepsExpandedBackspace() {
+        let centerWidth = KeyboardMetrics.centerKeyWidth(for: 375)
+        XCTAssertEqual(KeyboardMetrics.columnCount(for: 3, isSymbolMode: true), 6)
+        XCTAssertEqual(
+            KeyboardMetrics.keyWidth(for: 5, row: 3, centerKeyWidth: centerWidth, isSymbolMode: true),
+            KeyboardMetrics.rightSymbolKeyWidth + centerWidth + KeyboardMetrics.keySpacing
         )
     }
 

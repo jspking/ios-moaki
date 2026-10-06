@@ -54,6 +54,7 @@ let package = Package(
                 "KeyboardViewModelDeletionTests.swift",
                 "KeyboardViewModelDismissalTests.swift",
                 "KeyboardViewModelLongPressTests.swift",
+                "KeyboardViewModelVowelKeyTests.swift",
                 "SharedKeyboardPreferencesTests.swift",
                 "SpaceCursorGestureTrackerTests.swift"
             ],

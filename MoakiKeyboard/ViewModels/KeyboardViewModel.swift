@@ -229,7 +229,7 @@ final class KeyboardViewModel: ObservableObject {
             inputSymbol(symbol)
         case .backspace:
             deleteBackward()
-        case .consonant:
+        case .consonant, .vowelGesture:
             break
         }
     }
@@ -257,6 +257,10 @@ final class KeyboardViewModel: ObservableObject {
             inputSymbol(symbol)
         case .backspace:
             deleteBackward()
+        case .vowelGesture:
+            if let vowel = vowelResolver.resolve(strokes: strokes).vowel {
+                inputVowel(vowel)
+            }
         }
     }
 

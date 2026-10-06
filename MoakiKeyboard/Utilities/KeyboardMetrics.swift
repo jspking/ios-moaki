@@ -6,6 +6,7 @@ enum KeyContent: Equatable {
     case consonant(Choseong)
     case symbol(String)
     case backspace
+    case vowelGesture
 }
 
 enum KeyboardMetrics {
@@ -77,15 +78,17 @@ enum KeyboardMetrics {
     }
 
     // Get key width for specific column and row
-    static func keyWidth(for column: Int, row: Int, centerKeyWidth: CGFloat) -> CGFloat {
+    static func keyWidth(for column: Int, row: Int, centerKeyWidth: CGFloat, isSymbolMode: Bool = false) -> CGFloat {
         let leftSymbolWidth = centerKeyWidth * leftSymbolWidthRatio
 
-        // Row 3: backspace (col 5) fills remaining space to match row 0-2 width
-        // Row 0-2 width: leftSymbol + 5*center + rightSymbol + 6*spacing
-        // Row 3 without backspace: leftSymbol + 4*center + 5*spacing
-        // backspaceWidth = rightSymbol + center + spacing
         if row == 3 && column == 5 {
-            return rightSymbolKeyWidth + centerKeyWidth + keySpacing
+            return isSymbolMode
+                ? rightSymbolKeyWidth + centerKeyWidth + keySpacing
+                : rightSymbolKeyWidth
+        }
+
+        if row == 3 && column == 6 {
+            return centerKeyWidth
         }
 
         if column == 0 {
@@ -113,18 +116,18 @@ enum KeyboardMetrics {
         return CGSize(width: keyWidth, height: keyHeightValue)
     }
 
-    // Korean mode layout (7 columns for rows 0-2, 6 columns for row 3)
+    // Korean mode layout: seven columns on every row.
     // Left column: special symbols, Center: consonants, Right column: symbols
-    // Row 3: backspace expands to fill remaining space
+    // Row 3: compact backspace followed by the vowel gesture key.
     static let koreanLayout: [[KeyContent]] = [
         [.symbol("~"), .consonant(.ㅃ), .consonant(.ㅉ), .consonant(.ㄸ), .consonant(.ㄲ), .consonant(.ㅆ), .symbol("!")],
         [.symbol("^"), .consonant(.ㅂ), .consonant(.ㅈ), .consonant(.ㄷ), .consonant(.ㄱ), .consonant(.ㅅ), .symbol("?")],
         [.symbol(";"), .consonant(.ㅁ), .consonant(.ㄴ), .consonant(.ㅇ), .consonant(.ㄹ), .consonant(.ㅎ), .symbol(".")],
-        [.symbol("*"), .consonant(.ㅋ), .consonant(.ㅌ), .consonant(.ㅊ), .consonant(.ㅍ), .backspace],  // 6 columns
+        [.symbol("*"), .consonant(.ㅋ), .consonant(.ㅌ), .consonant(.ㅊ), .consonant(.ㅍ), .backspace, .vowelGesture],
     ]
 
     // Symbol mode layout.
-    // Same 7/7/7/6 geometry as Korean layout, values only are different.
+    // Seven columns on rows 0-2; the last row keeps an expanded backspace.
     // Digits are centered:
     // row 0: 1 2 3
     // row 1: 4 5 6
@@ -145,7 +148,7 @@ enum KeyboardMetrics {
         [nil, nil, nil, nil, nil, nil, nil],  // row 0 (쌍자음 - no numbers)
         [nil, "1", "2", "3", "4", "5", nil],  // row 1 (ㅂㅈㄷㄱㅅ)
         [nil, "6", "7", "8", "9", "0", nil],  // row 2 (ㅁㄴㅇㄹㅎ)
-        [nil, nil, nil, nil, nil, nil],       // row 3 (ㅋㅌㅊㅍ + backspace) - 6 columns
+        [nil, nil, nil, nil, nil, nil, nil],
     ]
 
     // Get key content at grid position for given mode
